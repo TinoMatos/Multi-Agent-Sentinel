@@ -72,6 +72,9 @@ async def _call_analista(inv: Investigacao) -> list[dict[str, Any]]:
 
 async def _call_observabilidade(inv: Investigacao) -> list[dict[str, Any]]:
     """Grafana MCP via SDK. Em modo degradado, deriva do Mongo (alert_ids salvos)."""
+    # Sem ticket nao tem o que correlacionar — pula MCP/LLM (economiza ~60s)
+    if not inv.ticket:
+        return []
     if observabilidade.disponivel():
         timeout_s = float(os.getenv("SENTINEL_OBS_TIMEOUT_S", "60"))
         try:
@@ -93,13 +96,15 @@ async def _call_observabilidade(inv: Investigacao) -> list[dict[str, Any]]:
 async def _call_tecnico(inv: Investigacao) -> list[dict[str, Any]]:
     """filesystem + Playwright via SDK. Timeout duro: cai em fallback se demorar."""
     url = (inv.ticket.get("url") if inv.ticket else None) or "nenhuma"
-    log_path = (inv.ticket.get("log_path") if inv.ticket else None) or "nenhum"
+    raw_log = (inv.ticket.get("log_path") if inv.ticket else None) or ""
+    # filesystem MCP esta rooted em ./data — converte 'data/logs/x.log' -> 'logs/x.log'
+    log_path = raw_log[len("data/"):] if raw_log.startswith("data/") else (raw_log or "nenhum")
     hipotese = (
         f"Cliente: {inv.cliente['nome'] if inv.cliente else '?'}. "
         f"Ticket: {inv.ticket['descricao'] if inv.ticket else inv.pergunta}. "
         f"Deploy suspeito: {inv.ticket.get('deploy_suspeito') if inv.ticket else 'nenhum'}. "
         f"URL para verificar com Playwright: {url}. "
-        f"Arquivo de log para ler com filesystem: {log_path}."
+        f"Arquivo de log para ler com filesystem (path relativo ao root data/): {log_path}."
     )
     timeout_s = float(os.getenv("SENTINEL_TECNICO_TIMEOUT_S", "90"))
     if tecnico_mod.disponivel():
@@ -285,9 +290,9 @@ async def run(pergunta: str, inv: Investigacao | None = None) -> Investigacao:
             # eh o ponto do agente. Sem ticket nao adianta (cliente nao existe).
             if inv.ticket:
                 inv.estado = State.CONFIRMANDO
-            elif inv.iteracao >= 2:
+            else:
+                # sem ticket nao adianta iterar — bail direto pro Critic
                 inv.estado = State.VALIDANDO
-            # senao continua COLETANDO
 
         elif inv.estado == State.CONFIRMANDO:
             inv.evidencias.extend(await _call_tecnico(inv))
@@ -318,7 +323,22 @@ async def run(pergunta: str, inv: Investigacao | None = None) -> Investigacao:
 if __name__ == "__main__":
     import sys
 
-    pergunta = " ".join(sys.argv[1:]) or "Por que o sistema da Acme esta caindo?"
+    args = [a for a in sys.argv[1:] if a != "--no-reset"]
+    no_reset = "--no-reset" in sys.argv[1:]
+    pergunta = " ".join(args) or "Por que o sistema da Acme esta caindo?"
+    if not no_reset:
+        try:
+            from agents.seed_helper import reset_tickets
+            r = reset_tickets()
+            if r["tickets_reabertos"] or r["rcas_apagados"]:
+                print(f"[auto-reset] {r['tickets_reabertos']} tickets reabertos, {r['rcas_apagados']} RCAs apagados")
+        except Exception as e:
+            print(f"[auto-reset] falhou ({type(e).__name__}) — seguindo mesmo assim")
+    # forca stdout em UTF-8 (Windows console default eh cp1252 e quebra com emojis)
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
     resultado = asyncio.run(run(pergunta))
     print(resultado.relatorio)
     print("\n---")

@@ -1,0 +1,10 @@
+2026-05-05T14:28:11Z [INFO]  api-acme-7c8d-x2: deploy dpl_2026_05_05_1428 (commit a1b2c3d4e5f6) rolled out
+2026-05-05T14:28:42Z [ERROR] api-acme-7c8d-x2: TypeError: Cannot read properties of undefined (reading 'tenantId')
+    at resolveTenant (src/auth/tenant.ts:42)
+    at Middleware.run (src/server.ts:118)
+2026-05-05T14:29:01Z [ERROR] api-acme-7c8d-x2: HTTP 500 returned to /login (request_id=ac-9183)
+2026-05-05T14:30:14Z [WARN]  oncall: alert_cpu_spike_97 firing (HTTP_500 rate > 5%)
+2026-05-05T14:35:02Z [ERROR] api-acme-7c8d-x2: TypeError: Cannot read properties of undefined (reading 'tenantId')
+    at resolveTenant (src/auth/tenant.ts:42)
+HISTORICAL: incidente identico em 2026-03-12 — commit 9988776655aa, rollback as 11:30, hotfix PR #214 (resolveTenant agora valida ctx.user antes de acessar tenantId).
+RUNBOOK: rollback do deploy a1b2c3d4e5f6, reaplicar PR #214, validar /login com tenant valido.

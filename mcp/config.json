@@ -1,8 +1,8 @@
 {
   "mcpServers": {
     "filesystem": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "./data", "./reports"]
+      "command": "mcp-server-filesystem",
+      "args": ["./data", "./reports"]
     },
     "mongodb": {
       "command": "npx",
@@ -18,12 +18,16 @@
       }
     },
     "playwright": {
-      "command": "npx",
-      "args": ["-y", "@playwright/mcp"]
+      "command": "node",
+      "args": ["C:/Users/Tino Matos PC/AppData/Roaming/npm/node_modules/@playwright/mcp/cli.js"]
     },
     "github": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "command": "docker",
+      "args": [
+        "run", "-i", "--rm",
+        "-e", "GITHUB_PERSONAL_ACCESS_TOKEN",
+        "ghcr.io/github/github-mcp-server"
+      ],
       "env": {
         "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_PERSONAL_ACCESS_TOKEN}"
       }

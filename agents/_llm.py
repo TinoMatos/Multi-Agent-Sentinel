@@ -55,6 +55,7 @@ def chat(model: str | None = None, temperature: float | None = None):
     return ChatOpenAI(
         model=resolved_model,
         temperature=resolved_temp,
+        max_tokens=int(os.getenv("SENTINEL_MAX_TOKENS", "4096")),
         api_key=os.getenv("OPENROUTER_API_KEY"),
         base_url=os.getenv("OPENROUTER_BASE_URL", cfg["base_url"]),
         default_headers={

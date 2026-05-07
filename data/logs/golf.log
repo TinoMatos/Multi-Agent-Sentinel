@@ -1,0 +1,7 @@
+2026-05-06T02:00:00Z [INFO]  aws-secrets: secret 'ledger-oauth' rotacionado (rotation policy: 30d)
+2026-05-06T02:01:00Z [ERROR] ledger-worker: UnauthorizedError: invalid client credentials
+    at OAuthClient.fetchToken (src/auth/oauth.ts:54)
+    at LedgerWorker.start (src/workers/ledger.ts:19)
+2026-05-06T14:50:00Z [ERROR] ledger-worker: 1740 falhas de auth desde 02:01 — pods continuam usando credencial antiga em memoria
+    ultimo deploy de codigo: 2026-04-28 (sem mudanca recente no codigo)
+RUNBOOK: rotacao de secret quebrou auth do worker. Causa NAO esta no codigo — esta na infra/secrets. Solucao: forcar restart dos pods ou implementar refresh dinamico do token. Repetir auditoria de quem mais consome 'ledger-oauth'.

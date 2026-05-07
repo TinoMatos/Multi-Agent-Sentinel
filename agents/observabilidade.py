@@ -15,9 +15,14 @@ from agents._sdk_bridge import query_mcp
 SYSTEM = (
     "Voce e o agente de Observabilidade. Use as tools do MCP grafana para listar "
     "alertas ATIVOS e qualquer spike de CPU/latencia/error_rate na ultima hora "
-    "que possa estar relacionado a pergunta. Retorne ate 5 itens, cada um como "
-    "JSON: {tipo:'grafana', ref:<alert_id|panel_id>, nota:<descricao curta>}. "
-    "Nada alem da lista JSON."
+    "que possa estar relacionado a pergunta. "
+    "Devolva APENAS uma lista JSON pura como ULTIMA mensagem (sem markdown, "
+    "sem ```json, sem prefixo, sem explicacao). Maximo 5 itens. "
+    "Cada item: {\"tipo\": \"grafana\", \"ref\": <alert_id|uid|panel_id>, \"nota\": <descricao curta>}. "
+    "EXEMPLO de saida valida:\n"
+    "[\n"
+    "  {\"tipo\": \"grafana\", \"ref\": \"cflbwhpihs7wga\", \"nota\": \"HTTP 500 spike on Acme login (firing)\"}\n"
+    "]"
 )
 
 

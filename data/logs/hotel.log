@@ -1,0 +1,7 @@
+2026-05-06T10:00:00Z [INFO]  feature-flag-svc: 'new_player_v2' rampada de 5% para 100% (sem deploy de codigo)
+2026-05-06T10:02:00Z [ERROR] web-hotel: AssertionError: expected user.subscription to be defined
+    at NewPlayer.render (src/player/new.tsx:74)
+2026-05-06T14:45:00Z [ERROR] web-hotel: 638 ocorrencias do mesmo erro — afeta apenas usuarios sem subscription (free tier)
+    feature_flag: 'new_player_v2' = 100%
+    ultimo deploy de codigo: 2026-04-29 (commit ccddeeff0011 introduziu a flag)
+RUNBOOK: NEW_PLAYER_V2 nao tratava user.subscription=null. Reduzir flag para 5% imediatamente. Hotfix: NewPlayer.render deve cair em fallback quando subscription ausente. Causa NAO foi deploy de codigo — foi rampagem de feature flag.

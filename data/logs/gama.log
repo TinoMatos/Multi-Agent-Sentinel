@@ -1,0 +1,6 @@
+2026-05-06T13:45:00Z [ERROR] api-gama: StripeConnectionError: Request to Stripe API timed out
+    at PaymentService.charge (src/payments/stripe.ts:67)
+    upstream_status: 503
+    upstream_host: api.stripe.com
+2026-05-06T14:50:00Z [ERROR] api-gama: 412 ocorrencias do mesmo erro nas ultimas 65min
+RUNBOOK: dependencia EXTERNA (Stripe) — nao ha codigo nosso pra mudar. Avaliar circuit breaker e fila de retry idempotente. Conferir status.stripe.com.

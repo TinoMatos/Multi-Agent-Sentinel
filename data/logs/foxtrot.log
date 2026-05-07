@@ -1,0 +1,7 @@
+2026-05-06T11:20:00Z [WARN]  search-svc: TooManyRequests: 429 from internal-svc/catalog
+    at HttpClient.request (src/http/client.ts:88)
+    at SearchService.enrich (src/search/service.ts:201)
+2026-05-06T11:25:00Z [WARN]  recommender-svc: catalog-svc retornando 429 — fila acumulando
+2026-05-06T14:55:00Z [ERROR] search-svc: 2890 ocorrencias de 429 nas ultimas 3h35min
+    cascata observada: search -> recommender -> catalog -> users
+RUNBOOK: rate-limit em CASCATA. catalog-svc esta saturado por chamadas do recommender apos pico de trafego. Aplicar circuit breaker no recommender e cache local de hot keys. Sem deploy correlato.

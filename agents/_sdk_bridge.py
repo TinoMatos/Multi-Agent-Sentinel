@@ -19,6 +19,7 @@ from agents import _llm
 _MCP_CONFIG_PATH = Path(__file__).resolve().parent.parent / "mcp" / "config.json"
 
 
+
 def _load_mcp_servers(nomes: list[str]) -> dict[str, Any]:
     if not _MCP_CONFIG_PATH.exists():
         return {}
@@ -72,16 +73,20 @@ async def query_mcp(servers: list[str], system: str, user: str, fast: bool = Fal
         tools = await client.get_tools()
         for t in tools:
             t.handle_tool_error = True
-        agent = create_react_agent(
-            llm, tools, prompt=system,
-            # erros de tool ficam como mensagem para o LLM ajustar e nao explodem o run
-            # (default ja tenta isso, mas garantimos com string customizada)
-        )
-        result = await agent.ainvoke({"messages": [{"role": "user", "content": user}]})
+        agent = create_react_agent(llm, tools, prompt=system)
+        msgs_in: list[dict] = [{"role": "user", "content": user}]
+        result = await agent.ainvoke({"messages": msgs_in})
     except Exception as e:
         # MCP indisponivel, query malformada, timeout do servidor, etc. -> modo degradado
         import logging
-        logging.getLogger(__name__).warning("MCP %s indisponivel: %s", servers, type(e).__name__)
+        # destrincha ExceptionGroup pra mostrar a causa real
+        detalhe = type(e).__name__
+        if hasattr(e, "exceptions"):
+            inner = [f"{type(x).__name__}: {str(x)[:200]}" for x in e.exceptions]  # type: ignore[attr-defined]
+            detalhe = f"{type(e).__name__} -> [{' | '.join(inner)}]"
+        else:
+            detalhe = f"{type(e).__name__}: {str(e)[:200]}"
+        logging.getLogger(__name__).warning("MCP %s indisponivel: %s", servers, detalhe)
         return []
 
     msgs = result.get("messages", [])
@@ -95,7 +100,27 @@ async def query_mcp(servers: list[str], system: str, user: str, fast: bool = Fal
     if not parsed and texto:
         import logging
         logging.getLogger(__name__).warning(
-            "MCP %s: LLM retornou %d chars, %d msgs, mas nao parseou JSON. Preview: %s",
-            servers, len(texto), len(msgs), texto[:300].replace("\n", " "),
+            "MCP %s: LLM retornou %d chars, %d msgs, mas nao parseou JSON. Reforcando formato.",
+            servers, len(texto), len(msgs),
         )
+        # 1 retry: pede explicitamente pra reformatar como lista JSON pura
+        try:
+            retry_msgs = msgs_in + [
+                {"role": "assistant", "content": texto},
+                {"role": "user", "content": (
+                    "Sua resposta nao esta em formato JSON parseavel. "
+                    "Reescreva APENAS a lista JSON pura (comecando com [ e terminando com ]), "
+                    "sem nenhum texto antes ou depois. Se nao tiver nada relevante a relatar, "
+                    "responda exatamente: []"
+                )},
+            ]
+            result2 = await agent.ainvoke({"messages": retry_msgs})
+            msgs2 = result2.get("messages", [])
+            for m in reversed(msgs2):
+                content = getattr(m, "content", None)
+                if isinstance(content, str) and content.strip():
+                    parsed = _parse_evidencias(content)
+                    break
+        except Exception:
+            pass
     return parsed

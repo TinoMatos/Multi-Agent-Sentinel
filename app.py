@@ -445,6 +445,12 @@ with st.sidebar:
         if cenario is None
         else cenario
     )
+    auto_reset = st.checkbox(
+        "🔄 Auto-reset (reabre ticket antes)",
+        value=True,
+        help="Reabre tickets fechados por investigações anteriores. Sem isso você vê 'cliente sem tickets' depois da 1ª rodada.",
+    )
+    st.session_state["auto_reset_flag"] = auto_reset
     rodar = st.button("▶️  INVESTIGAR", type="primary", use_container_width=True)
     auto_demo = st.button("🚀  AUTO-DEMO (8 cenários)", use_container_width=True)
 
@@ -702,6 +708,13 @@ def render_replay(inv):
 
 def _executar(pergunta_q: str, mostrar_pills: bool = True):
     from agents.triagem import Investigacao
+
+    if st.session_state.get("auto_reset_flag", True):
+        try:
+            from agents.seed_helper import reset_tickets
+            reset_tickets()
+        except Exception:
+            pass  # mongo offline / sem permissao — segue mesmo assim
 
     inv_shared = Investigacao(pergunta=pergunta_q)
 

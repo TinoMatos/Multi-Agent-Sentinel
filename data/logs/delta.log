@@ -1,0 +1,8 @@
+2026-05-03T18:00:00Z [INFO]  api-delta-7f9d4c-xq2pl: heap_used=0.4GB
+2026-05-04T18:00:00Z [INFO]  api-delta-7f9d4c-xq2pl: heap_used=1.6GB (rss growth ~50MB/h)
+2026-05-05T18:00:00Z [INFO]  api-delta-7f9d4c-xq2pl: heap_used=2.8GB
+2026-05-06T13:22:00Z [FATAL] api-delta-7f9d4c-xq2pl: Process killed by oom-killer after heap grew to 3.8GB (limit 4GB)
+    pod: api-delta-7f9d4c-xq2pl
+    uptime_at_kill: 71h22m
+    deploy: dpl_2026_05_02_1100 (commit 5544332211dd)
+RUNBOOK: memory leak GRADUAL desde 2026-05-03 — bisect do commit 5544332211dd, suspeitar de listeners nao removidos / cache sem TTL. Pods reiniciam ~3 dias por bater limit.

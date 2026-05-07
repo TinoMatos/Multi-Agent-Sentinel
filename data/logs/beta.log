@@ -1,0 +1,6 @@
+2026-05-04T22:10:00Z [WARN]  api-beta: query lenta detectada — db.audit_logs.find() levou 30000ms
+2026-05-04T22:10:00Z [ERROR] api-beta: MongoServerSelectionError: connection timed out after 30000ms
+    at Topology.selectServer (mongodb/lib/sdam/topology.js:303)
+    query: db.audit_logs.find({org: ObjectId(...), data: {$gte: ...}}).sort({data: -1})
+2026-05-06T14:18:42Z [ERROR] api-beta: mesma query lenta — repetida 87x desde 2026-05-04
+RUNBOOK: criar indice composto em audit_logs.{org:1, data:-1}. SEM deploy correlato — problema de schema, nao de codigo.
