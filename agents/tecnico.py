@@ -54,19 +54,25 @@ async def coletar(hipotese: str) -> list[dict[str, Any]]:
     if not disponivel():
         return []
     import os
-    servers = ["filesystem", "playwright"]
-    # Github MCP so entra com PAT + flag explicita + repo definido.
+    # 1) MCPs essenciais (filesystem + playwright) — sempre
+    evidencias = await query_mcp(
+        servers=["filesystem", "playwright"],
+        system=_build_system(),
+        user=hipotese,
+    )
+    # 2) GitHub MCP em chamada separada — se falhar nao derruba o resto
     if (
         os.getenv("GITHUB_PERSONAL_ACCESS_TOKEN")
         and os.getenv("SENTINEL_USE_GITHUB") == "1"
         and os.getenv("SENTINEL_GITHUB_REPO", "").strip()
     ):
-        servers.append("github")
-    return await query_mcp(
-        servers=servers,
-        system=_build_system(),
-        user=hipotese,
-    )
+        gh_evid = await query_mcp(
+            servers=["github"],
+            system=_build_system(),
+            user=hipotese,
+        )
+        evidencias.extend(gh_evid)
+    return evidencias
 
 
 # ---------- helpers deterministicos (usados por testes e Critic) ----------

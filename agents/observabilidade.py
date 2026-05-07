@@ -29,4 +29,4 @@ def disponivel() -> bool:
 async def coletar(pergunta: str) -> list[dict[str, Any]]:
     if not disponivel():
         return []
-    return await query_mcp(servers=["grafana"], system=SYSTEM, user=pergunta)
+    return await query_mcp(servers=["grafana"], system=SYSTEM, user=pergunta, fast=True)

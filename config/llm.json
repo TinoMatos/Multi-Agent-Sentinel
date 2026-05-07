@@ -2,15 +2,15 @@
   "_comment": "Configuracao dos modelos LLM. Edite e clique Investigar de novo (Streamlit recarrega). Var de ambiente (SENTINEL_MODEL, SENTINEL_MODEL_FAST) tem precedencia sobre este arquivo. Catalogo OpenRouter: https://openrouter.ai/models",
 
   "main": {
-    "model": "deepseek/deepseek-chat-v3.1:free",
+    "model": "anthropic/claude-sonnet-4.6",
     "temperature": 0.0,
     "_used_by": "Triagem (orquestrador) + Tecnico (ReAct loop com MCPs filesystem/playwright/github)"
   },
 
   "fast": {
-    "model": "meta-llama/llama-3.3-70b-instruct:free",
+    "model": "anthropic/claude-haiku-4.5",
     "temperature": 0.0,
-    "_used_by": "Critic (validacao anti-alucinacao). Use modelo rapido/barato — roda em todo RCA."
+    "_used_by": "Critic + Observabilidade. Modelo rapido/barato — roda em todo RCA."
   },
 
   "_alternativas_testadas": {

@@ -53,8 +53,8 @@ def _parse_evidencias(texto: str) -> list[dict[str, Any]]:
     return [e for e in data if isinstance(e, dict) and "tipo" in e]
 
 
-async def query_mcp(servers: list[str], system: str, user: str) -> list[dict[str, Any]]:
-    llm = _llm.chat()
+async def query_mcp(servers: list[str], system: str, user: str, fast: bool = False) -> list[dict[str, Any]]:
+    llm = _llm.fast() if fast else _llm.chat()
     if llm is None:
         return []
     try:
@@ -91,4 +91,11 @@ async def query_mcp(servers: list[str], system: str, user: str) -> list[dict[str
         if isinstance(content, str) and content.strip():
             texto = content
             break
-    return _parse_evidencias(texto)
+    parsed = _parse_evidencias(texto)
+    if not parsed and texto:
+        import logging
+        logging.getLogger(__name__).warning(
+            "MCP %s: LLM retornou %d chars, %d msgs, mas nao parseou JSON. Preview: %s",
+            servers, len(texto), len(msgs), texto[:300].replace("\n", " "),
+        )
+    return parsed

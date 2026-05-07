@@ -320,6 +320,23 @@ st.markdown(
 section[data-testid="stSidebar"] {
     background: linear-gradient(180deg, #0a0e1a 0%, #070a14 100%);
     border-right: 1px solid rgba(99,102,241,0.1);
+    min-width: 320px !important;
+    width: 320px !important;
+    transform: translateX(0) !important;
+    visibility: visible !important;
+}
+section[data-testid="stSidebar"][aria-expanded="false"] {
+    margin-left: 0 !important;
+}
+/* esconde o botao colapsar (evita o bug de toggle automatico) */
+button[data-testid="stSidebarCollapseButton"],
+button[data-testid="stSidebarCollapsedControl"],
+[data-testid="collapsedControl"] {
+    display: none !important;
+}
+/* garante que o conteudo principal nao fique por baixo da sidebar */
+section.main, [data-testid="stAppViewContainer"] > .main {
+    margin-left: 320px !important;
 }
 
 /* RCA box */

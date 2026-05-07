@@ -73,9 +73,13 @@ async def _call_analista(inv: Investigacao) -> list[dict[str, Any]]:
 async def _call_observabilidade(inv: Investigacao) -> list[dict[str, Any]]:
     """Grafana MCP via SDK. Em modo degradado, deriva do Mongo (alert_ids salvos)."""
     if observabilidade.disponivel():
-        ev = await observabilidade.coletar(inv.pergunta)
-        if ev:
-            return ev
+        timeout_s = float(os.getenv("SENTINEL_OBS_TIMEOUT_S", "60"))
+        try:
+            ev = await asyncio.wait_for(observabilidade.coletar(inv.pergunta), timeout=timeout_s)
+            if ev:
+                return ev
+        except asyncio.TimeoutError:
+            pass  # cai no fallback deterministico
     if not inv.ticket:
         return []
     erros = analista.erros_do_ticket(inv.ticket)
@@ -88,12 +92,16 @@ async def _call_observabilidade(inv: Investigacao) -> list[dict[str, Any]]:
 
 async def _call_tecnico(inv: Investigacao) -> list[dict[str, Any]]:
     """filesystem + Playwright via SDK. Timeout duro: cai em fallback se demorar."""
+    url = (inv.ticket.get("url") if inv.ticket else None) or "nenhuma"
+    log_path = (inv.ticket.get("log_path") if inv.ticket else None) or "nenhum"
     hipotese = (
         f"Cliente: {inv.cliente['nome'] if inv.cliente else '?'}. "
         f"Ticket: {inv.ticket['descricao'] if inv.ticket else inv.pergunta}. "
-        f"Deploy suspeito: {inv.ticket.get('deploy_suspeito') if inv.ticket else 'nenhum'}."
+        f"Deploy suspeito: {inv.ticket.get('deploy_suspeito') if inv.ticket else 'nenhum'}. "
+        f"URL para verificar com Playwright: {url}. "
+        f"Arquivo de log para ler com filesystem: {log_path}."
     )
-    timeout_s = float(os.getenv("SENTINEL_TECNICO_TIMEOUT_S", "10"))
+    timeout_s = float(os.getenv("SENTINEL_TECNICO_TIMEOUT_S", "90"))
     if tecnico_mod.disponivel():
         try:
             ev = await asyncio.wait_for(tecnico_mod.coletar(hipotese), timeout=timeout_s)
