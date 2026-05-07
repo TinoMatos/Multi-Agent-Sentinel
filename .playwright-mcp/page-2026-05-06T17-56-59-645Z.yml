@@ -1,0 +1,268 @@
+- generic [active] [ref=e1]:
+  - table [ref=e2]:
+    - rowgroup [ref=e3]:
+      - row "anvil logo ACME Laboratories Graphics * Unix * Networks * Fun atom logo" [ref=e4]:
+        - cell "anvil logo" [ref=e5]:
+          - img "anvil logo" [ref=e6]
+        - cell "ACME Laboratories Graphics * Unix * Networks * Fun" [ref=e7]:
+          - table [ref=e8]:
+            - rowgroup [ref=e9]:
+              - row "ACME Laboratories" [ref=e10]:
+                - cell "ACME Laboratories" [ref=e11]:
+                  - generic [ref=e12]: ACME Laboratories
+              - row "Graphics * Unix * Networks * Fun" [ref=e13]:
+                - cell "Graphics * Unix * Networks * Fun" [ref=e14]:
+                  - generic [ref=e15]: Graphics * Unix * Networks * Fun
+        - cell "atom logo" [ref=e16]:
+          - img "atom logo" [ref=e17]
+      - row "Purveyors of fine freeware since 1972. On the net since 1991." [ref=e18]:
+        - cell "Purveyors of fine freeware since 1972. On the net since 1991." [ref=e19]:
+          - generic [ref=e20]: Purveyors of fine freeware since 1972. On the net since 1991.
+  - list [ref=e21]:
+    - listitem [ref=e22]:
+      - link "ACME Updates." [ref=e23] [cursor=pointer]:
+        - /url: updates/
+    - listitem [ref=e24]:
+      - link "ACME Labs maps" [ref=e25] [cursor=pointer]:
+        - /url: maps.html
+      - text: ", including:"
+      - list [ref=e26]:
+        - listitem [ref=e27]:
+          - generic [ref=e28]:
+            - text: The
+            - link "ACME Mapper" [ref=e29] [cursor=pointer]:
+              - /url: //mapper.acme.com/
+            - text: .
+        - listitem [ref=e30]:
+          - link "ACME GeoRSS Map Viewer" [ref=e31] [cursor=pointer]:
+            - /url: GeoRSS/
+          - text: .
+        - listitem [ref=e32]:
+          - link "Bay Area Sandwiches" [ref=e33] [cursor=pointer]:
+            - /url: jef/sandwiches/
+          - text: .
+        - listitem [ref=e34]:
+          - link "Paris Metro map" [ref=e35] [cursor=pointer]:
+            - /url: metro/
+          - text: .
+        - listitem [ref=e36]:
+          - link "ACME Planimeter" [ref=e37] [cursor=pointer]:
+            - /url: planimeter/
+          - text: .
+    - listitem [ref=e38]:
+      - text: The
+      - link "ACME Labs freeware library" [ref=e39] [cursor=pointer]:
+        - /url: software/
+      - text: .
+      - list [ref=e40]:
+        - listitem [ref=e41]:
+          - link "e" [ref=e42] [cursor=pointer]:
+            - /url: software/e/
+          - text: "- tiny EMACS-like text editor."
+        - listitem [ref=e43]:
+          - link "thttpd" [ref=e44] [cursor=pointer]:
+            - /url: software/thttpd/
+          - text: "- tiny/turbo/throttling web server."
+        - listitem [ref=e45]:
+          - link "mini_httpd" [ref=e46] [cursor=pointer]:
+            - /url: software/mini_httpd/
+          - text: "- simple web server that does HTTPS."
+        - listitem [ref=e47]:
+          - link "micro_httpd" [ref=e48] [cursor=pointer]:
+            - /url: software/micro_httpd/
+          - text: "- world's smallest web server?"
+        - listitem [ref=e49]:
+          - link "spfmilter" [ref=e50] [cursor=pointer]:
+            - /url: software/spfmilter/
+          - text: "- SPF mail filter module."
+        - listitem [ref=e51]:
+          - link "pbmplus" [ref=e52] [cursor=pointer]:
+            - /url: software/pbmplus/
+          - text: "- toolkit for converting image file formats."
+        - listitem [ref=e53]:
+          - text: The
+          - link "currently-lit face of the Earth" [ref=e54] [cursor=pointer]:
+            - /url: software/globe/
+          - text: ", in ASCII."
+        - listitem [ref=e55]:
+          - text: The
+          - link "current phase of the Moon" [ref=e56] [cursor=pointer]:
+            - /url: software/phoon/
+          - text: ", in ASCII."
+    - listitem [ref=e57]:
+      - text: The
+      - link "ACME JavaScript utilities" [ref=e58] [cursor=pointer]:
+        - /url: javascript/
+      - text: .
+    - listitem [ref=e59]:
+      - text: The
+      - link "ACME Java pages" [ref=e60] [cursor=pointer]:
+        - /url: java/
+      - text: .
+      - list [ref=e61]:
+        - listitem [ref=e62]:
+          - text: The
+          - link "current phase of the Moon" [ref=e63] [cursor=pointer]:
+            - /url: java/software/Phoon.html
+          - text: ", in Java."
+        - listitem [ref=e64]:
+          - text: A
+          - link "Java printf()-equivalent" [ref=e65] [cursor=pointer]:
+            - /url: java/software/Acme.Fmt.html
+          - text: .
+        - listitem [ref=e66]:
+          - text: A
+          - link "GIF encoder" [ref=e67] [cursor=pointer]:
+            - /url: java/software/Acme.JPM.Encoders.GifEncoder.html
+          - text: "!"
+        - listitem [ref=e68]:
+          - link "PostScript-like graphics" [ref=e69] [cursor=pointer]:
+            - /url: java/software/Acme.Psg.html
+          - text: .
+        - listitem [ref=e70]:
+          - text: A simple
+          - link "web server" [ref=e71] [cursor=pointer]:
+            - /url: java/software/Acme.Serve.Serve.html
+          - text: in Java.
+    - listitem [ref=e72]:
+      - text: "Tutorials and resources:"
+      - list [ref=e73]:
+        - listitem [ref=e74]:
+          - generic [ref=e75]:
+            - text: The
+            - link "ACME Comment Weblet" [ref=e76] [cursor=pointer]:
+              - /url: /comments/
+            - text: .
+        - listitem [ref=e77]:
+          - link "Web API Demonstrations" [ref=e78] [cursor=pointer]:
+            - /url: webapis/
+          - text: .
+        - listitem [ref=e79]:
+          - link "HTML5 Canvas" [ref=e80] [cursor=pointer]:
+            - /url: canvas/
+          - text: .
+        - listitem [ref=e81]:
+          - generic [ref=e82]:
+            - text: Learn how to
+            - link "filter out emailed spam" [ref=e83] [cursor=pointer]:
+              - /url: mail_filtering/
+            - text: .
+        - listitem [ref=e84]:
+          - text: The
+          - link "ACME Caption Maker" [ref=e85] [cursor=pointer]:
+            - /url: caption/
+          - text: .
+        - listitem [ref=e86]:
+          - text: The
+          - link "ACME Chartmaker" [ref=e87] [cursor=pointer]:
+            - /url: chartmaker/
+          - text: .
+        - listitem [ref=e88]:
+          - text: The
+          - link "ACME Annotator" [ref=e89] [cursor=pointer]:
+            - /url: annotator/
+          - text: .
+        - listitem [ref=e90]:
+          - link "Twoday" [ref=e91] [cursor=pointer]:
+            - /url: twitter/twoday/
+          - text: ", shows you what you tweeted on this day in past years."
+        - listitem [ref=e92]:
+          - text: Learn how to
+          - link "set up a FreeBSD firewall" [ref=e93] [cursor=pointer]:
+            - /url: firewall.html
+          - text: .
+        - listitem [ref=e94]:
+          - text: An
+          - link "HTML sampler" [ref=e95] [cursor=pointer]:
+            - /url: html_samples.html
+          - text: ", and a"
+          - link "colormap sampler" [ref=e96] [cursor=pointer]:
+            - /url: colormap.html
+          - text: .
+        - listitem [ref=e97]:
+          - link "Unicode characters" [ref=e98] [cursor=pointer]:
+            - /url: unicode/
+          - text: .
+          - list [ref=e99]:
+            - listitem [ref=e100]:
+              - link "Unicode Transformations" [ref=e101] [cursor=pointer]:
+                - /url: unicode/transformations.html
+              - text: .
+            - listitem [ref=e102]:
+              - link "Unicode Decoder" [ref=e103] [cursor=pointer]:
+                - /url: unicode/decode.html
+              - text: .
+        - listitem [ref=e104]:
+          - link "One Month" [ref=e105] [cursor=pointer]:
+            - /url: onemonth/
+          - text: ", a single calendar page."
+    - listitem [ref=e106]:
+      - text: "Toys and amusements:"
+      - list [ref=e107]:
+        - listitem [ref=e108]:
+          - text: The
+          - link "ACME Label Maker" [ref=e109] [cursor=pointer]:
+            - /url: labelmaker/
+          - text: .
+        - listitem [ref=e110]:
+          - text: The
+          - link "ACME License Maker" [ref=e111] [cursor=pointer]:
+            - /url: licensemaker/
+          - text: .
+        - listitem [ref=e112]:
+          - text: "Just for Valentine's Day: the"
+          - link "ACME Heart Maker" [ref=e113] [cursor=pointer]:
+            - /url: heartmaker/
+          - text: .
+        - listitem [ref=e114]:
+          - text: The
+          - link "ACME ChuMaker" [ref=e115] [cursor=pointer]:
+            - /url: chumaker/
+          - text: .
+        - listitem [ref=e116]:
+          - text: The
+          - link "ACME Chocolate Registry" [ref=e117] [cursor=pointer]:
+            - /url: chocolate/
+          - text: .
+        - listitem [ref=e118]:
+          - link "ACME Labs Calendar." [ref=e119] [cursor=pointer]:
+            - /url: calendar/
+    - listitem [ref=e120]:
+      - link "ACME News" [ref=e121] [cursor=pointer]:
+        - /url: news/login/
+      - text: ", a free web conferencing system."
+    - listitem [ref=e122]:
+      - link "Jef Poskanzer's personal page." [ref=e123] [cursor=pointer]:
+        - /url: jef/
+    - listitem [ref=e124]:
+      - link "acme.com's hardware." [ref=e125] [cursor=pointer]:
+        - /url: hardware/
+    - listitem [ref=e126]:
+      - link "What does ACME mean?" [ref=e127] [cursor=pointer]:
+        - /url: what_is_acme/
+    - listitem [ref=e128]:
+      - link "Other ACMEs on the web." [ref=e129] [cursor=pointer]:
+        - /url: other_acmes.html
+    - listitem [ref=e130]:
+      - link "ACME Labs Freeware License." [ref=e131] [cursor=pointer]:
+        - /url: license.html
+    - listitem [ref=e132]:
+      - link "ACME Labs Privacy Policy" [ref=e133] [cursor=pointer]:
+        - /url: privacy.html
+      - text: .
+    - listitem [ref=e134]:
+      - link "Donate $5 to help support ACME Labs." [ref=e135] [cursor=pointer]:
+        - /url: donate/
+  - separator [ref=e136]
+  - paragraph [ref=e137]: "Note: the only affiliation between ACME Laboratories and Warner Brothers is that I've been a fan of Wile E. Coyote for decades."
+  - separator [ref=e138]
+  - link "valid HTML":
+    - /url: https://validator.w3.org/check?uri=referer
+    - img "valid HTML" [ref=e139] [cursor=pointer]
+  - paragraph [ref=e140]:
+    - link "email" [ref=e141] [cursor=pointer]:
+      - /url: /mailto/?id=wa
+      - img "email" [ref=e142]
+    - link "logo" [ref=e143] [cursor=pointer]:
+      - /url: /software/thttpd/
+      - img "logo" [ref=e144]

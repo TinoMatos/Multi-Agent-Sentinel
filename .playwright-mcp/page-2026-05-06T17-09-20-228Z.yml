@@ -1,0 +1,481 @@
+- generic [ref=e2]:
+  - region
+  - generic [ref=e3]:
+    - link "Skip to content" [ref=e4] [cursor=pointer]:
+      - /url: "#start-of-content"
+    - banner [ref=e6]:
+      - heading "Navigation Menu" [level=2] [ref=e7]
+      - generic [ref=e9]:
+        - button "Toggle navigation" [ref=e11] [cursor=pointer]
+        - link "Homepage" [ref=e17] [cursor=pointer]:
+          - /url: /
+          - img [ref=e18]
+        - generic [ref=e20]:
+          - link "Sign in" [ref=e21] [cursor=pointer]:
+            - /url: /login?return_to=https%3A%2F%2Fgithub.com%2Fsearch%3Fq%3Da1b2c3d4e5f6%2BOR%2B%2522Cannot%2Bread%2Bproperties%2Bof%2Bundefined%2Breading%2BtenantId%2522%26type%3Dissues
+          - button "Appearance settings" [ref=e24] [cursor=pointer]:
+            - img
+  - main [ref=e27]:
+    - generic [ref=e30]:
+      - heading "issues Search Results · a1b2c3d4e5f6 OR \"Cannot read properties of undefined reading tenantId\"" [level=1] [ref=e31]
+      - generic [ref=e34]:
+        - generic [ref=e35]:
+          - region "Filter by" [ref=e36]:
+            - heading "Filter by" [level=2] [ref=e37]
+            - list "Filter by" [ref=e42]:
+              - listitem [ref=e43]:
+                - list [ref=e44]:
+                  - listitem [ref=e45]:
+                    - link "Code (...) results" [ref=e46] [cursor=pointer]:
+                      - /url: https://github.com/search?q=a1b2c3d4e5f6+OR+%22Cannot+read+properties+of+undefined+reading+tenantId%22&type=code
+                      - generic:
+                        - img
+                      - generic [ref=e47]:
+                        - generic [ref=e48]: Code
+                        - generic:
+                          - generic: ...
+                          - generic: (...)
+                          - generic: results
+                  - listitem [ref=e49]:
+                    - link "Repositories results" [ref=e50] [cursor=pointer]:
+                      - /url: https://github.com/search?q=a1b2c3d4e5f6+OR+%22Cannot+read+properties+of+undefined+reading+tenantId%22&type=repositories
+                      - generic:
+                        - img
+                      - generic [ref=e51]:
+                        - generic [ref=e52]: Repositories
+                        - generic:
+                          - generic: results
+                  - listitem [ref=e53]:
+                    - link "Issues results" [ref=e54] [cursor=pointer]:
+                      - /url: https://github.com/search?q=a1b2c3d4e5f6+OR+%22Cannot+read+properties+of+undefined+reading+tenantId%22&type=issues
+                      - generic:
+                        - img
+                      - generic [ref=e55]:
+                        - generic [ref=e56]: Issues
+                        - generic:
+                          - generic: results
+                  - listitem [ref=e57]:
+                    - link "Pull requests results" [ref=e58] [cursor=pointer]:
+                      - /url: https://github.com/search?q=a1b2c3d4e5f6+OR+%22Cannot+read+properties+of+undefined+reading+tenantId%22&type=pullrequests
+                      - generic:
+                        - img
+                      - generic [ref=e59]:
+                        - generic [ref=e60]: Pull requests
+                        - generic:
+                          - generic: results
+                  - listitem [ref=e61]:
+                    - link "Discussions results" [ref=e62] [cursor=pointer]:
+                      - /url: https://github.com/search?q=a1b2c3d4e5f6+OR+%22Cannot+read+properties+of+undefined+reading+tenantId%22&type=discussions
+                      - generic:
+                        - img
+                      - generic [ref=e63]:
+                        - generic [ref=e64]: Discussions
+                        - generic:
+                          - generic: results
+                  - listitem [ref=e65]:
+                    - link "Users results" [ref=e66] [cursor=pointer]:
+                      - /url: https://github.com/search?q=a1b2c3d4e5f6+OR+%22Cannot+read+properties+of+undefined+reading+tenantId%22&type=users
+                      - generic:
+                        - img
+                      - generic [ref=e67]:
+                        - generic [ref=e68]: Users
+                        - generic:
+                          - generic: results
+                  - listitem [ref=e69]:
+                    - button "More" [ref=e70] [cursor=pointer]:
+                      - generic:
+                        - img
+                      - generic [ref=e72]: More
+              - listitem [ref=e73]:
+                - heading "State" [level=3] [ref=e75]
+                - list "State" [ref=e76]:
+                  - listitem [ref=e77]:
+                    - link "Open" [ref=e78] [cursor=pointer]:
+                      - /url: https://github.com/search?q=a1b2c3d4e5f6+OR+%22Cannot+read+properties+of+undefined+reading+tenantId%22&type=issues&state=open
+                      - generic:
+                        - img
+                      - generic "Open" [ref=e82]
+                  - listitem [ref=e83]:
+                    - link "Closed" [ref=e84] [cursor=pointer]:
+                      - /url: https://github.com/search?q=a1b2c3d4e5f6+OR+%22Cannot+read+properties+of+undefined+reading+tenantId%22&type=issues&state=closed
+                      - generic:
+                        - img
+                      - generic "Closed" [ref=e88]
+                  - listitem [ref=e89]
+              - listitem [ref=e90]:
+                - heading "Advanced" [level=3] [ref=e92]
+                - list "Advanced" [ref=e93]:
+                  - listitem [ref=e94]:
+                    - button "Owner" [ref=e95] [cursor=pointer]:
+                      - generic:
+                        - img
+                      - generic "Owner" [ref=e99]
+                  - listitem [ref=e100]:
+                    - button "State" [ref=e101] [cursor=pointer]:
+                      - generic:
+                        - img
+                      - generic "State" [ref=e105]
+                  - listitem [ref=e106]:
+                    - button "Close reason" [ref=e107] [cursor=pointer]:
+                      - generic:
+                        - img
+                      - generic "Close reason" [ref=e111]
+                  - listitem [ref=e112]:
+                    - link "Has linked pull request" [ref=e113] [cursor=pointer]:
+                      - /url: https://github.com/search?q=a1b2c3d4e5f6+OR+%22Cannot+read+properties+of+undefined+reading+tenantId%22+linked%3Apr&type=issues
+                      - generic:
+                        - img
+                      - generic "Has linked pull request" [ref=e117]
+                  - listitem [ref=e118]:
+                    - button "Author" [ref=e119] [cursor=pointer]:
+                      - generic:
+                        - img
+                      - generic "Author" [ref=e123]
+                  - listitem [ref=e124]:
+                    - button "Assignee" [ref=e125] [cursor=pointer]:
+                      - generic:
+                        - img
+                      - generic "Assignee" [ref=e129]
+                  - listitem [ref=e130]:
+                    - button "Mentioned user" [ref=e131] [cursor=pointer]:
+                      - generic:
+                        - img
+                      - generic "Mentioned user" [ref=e135]
+                  - listitem [ref=e136]:
+                    - button "Mentioned team" [ref=e137] [cursor=pointer]:
+                      - generic:
+                        - img
+                      - generic "Mentioned team" [ref=e141]
+                  - listitem [ref=e142]:
+                    - button "Commenter" [ref=e143] [cursor=pointer]:
+                      - generic:
+                        - img
+                      - generic "Commenter" [ref=e147]
+                  - listitem [ref=e148]:
+                    - button "Involved user" [ref=e149] [cursor=pointer]:
+                      - generic:
+                        - img
+                      - generic "Involved user" [ref=e153]
+                  - listitem [ref=e154]:
+                    - button "Label" [ref=e155] [cursor=pointer]:
+                      - generic:
+                        - img
+                      - generic "Label" [ref=e159]
+                  - listitem [ref=e160]:
+                    - button "Milestone" [ref=e161] [cursor=pointer]:
+                      - generic:
+                        - img
+                      - generic "Milestone" [ref=e165]
+                  - listitem [ref=e166]:
+                    - button "Number of comments" [ref=e167] [cursor=pointer]:
+                      - generic:
+                        - img
+                      - generic "Number of comments" [ref=e171]
+                  - listitem [ref=e172]:
+                    - button "Number of interactions" [ref=e173] [cursor=pointer]:
+                      - generic:
+                        - img
+                      - generic "Number of interactions" [ref=e177]
+              - listitem [ref=e178]
+              - listitem [ref=e179]:
+                - link "Advanced search" [ref=e180] [cursor=pointer]:
+                  - /url: /search/advanced
+                  - generic:
+                    - img
+                  - generic [ref=e182]: Advanced search
+          - slider "Draggable pane splitter" [ref=e184]
+        - generic [ref=e188]:
+          - generic [ref=e190]:
+            - generic [ref=e191]:
+              - generic [ref=e192]:
+                - generic [ref=e193]: 428 results
+                - generic [ref=e194]: (203 ms)
+              - heading "428 results" [active] [level=2] [ref=e195]
+            - generic [ref=e196]:
+              - 'button "Sort by: Best match" [ref=e198] [cursor=pointer]':
+                - generic [ref=e200]: "Sort by: Best match"
+                - generic:
+                  - img
+              - button "Open column options" [ref=e202] [cursor=pointer]:
+                - img [ref=e203]
+          - generic [ref=e207]:
+            - generic [ref=e208]:
+              - heading "dudung/26b16 Infographic, generative ai assistant, neural networks visual intro" [level=3] [ref=e209]:
+                - link "dudung/26b16" [ref=e211] [cursor=pointer]:
+                  - /url: /dudung/26b16
+                - generic [ref=e212]:
+                  - img [ref=e214]
+                  - link "Infographic, generative ai assistant, neural networks visual intro" [ref=e217] [cursor=pointer]:
+                    - /url: /dudung/26b16/issues/29
+              - generic [ref=e221]: SK5010
+              - list [ref=e222]:
+                - listitem [ref=e223]: dudung
+                - generic [ref=e224]: ·
+                - listitem [ref=e225]:
+                  - img [ref=e227]
+                  - text: "3"
+                - generic [ref=e229]: ·
+                - listitem [ref=e230]:
+                  - text: Opened
+                  - generic "20 de abr. de 2026, 17:45 BRT" [ref=e231]: 15 days ago
+                - generic [ref=e232]: ·
+                - listitem [ref=e233]:
+                  - link "#29" [ref=e234] [cursor=pointer]:
+                    - /url: /dudung/26b16/issues/29
+            - generic [ref=e235]:
+              - heading "dudung/26b16 Neural networks intro with llm" [level=3] [ref=e236]:
+                - link "dudung/26b16" [ref=e238] [cursor=pointer]:
+                  - /url: /dudung/26b16
+                - generic [ref=e239]:
+                  - img [ref=e241]
+                  - link "Neural networks intro with llm" [ref=e244] [cursor=pointer]:
+                    - /url: /dudung/26b16/issues/28
+              - generic [ref=e248]: FI3271
+              - list [ref=e249]:
+                - listitem [ref=e250]: dudung
+                - generic [ref=e251]: ·
+                - listitem [ref=e252]:
+                  - img [ref=e254]
+                  - text: "21"
+                - generic [ref=e256]: ·
+                - listitem [ref=e257]:
+                  - text: Opened
+                  - generic "20 de abr. de 2026, 02:42 BRT" [ref=e258]: 16 days ago
+                - generic [ref=e259]: ·
+                - listitem [ref=e260]:
+                  - link "#28" [ref=e261] [cursor=pointer]:
+                    - /url: /dudung/26b16/issues/28
+            - generic [ref=e262]:
+              - heading "dudung/26b16 Infographic and final project idea presentation" [level=3] [ref=e263]:
+                - link "dudung/26b16" [ref=e265] [cursor=pointer]:
+                  - /url: /dudung/26b16
+                - generic [ref=e266]:
+                  - img [ref=e268]
+                  - link "Infographic and final project idea presentation" [ref=e271] [cursor=pointer]:
+                    - /url: /dudung/26b16/issues/30
+              - generic [ref=e275]: FI5005
+              - list [ref=e276]:
+                - listitem [ref=e277]: dudung
+                - generic [ref=e278]: ·
+                - listitem [ref=e279]:
+                  - img [ref=e281]
+                  - text: "6"
+                - generic [ref=e283]: ·
+                - listitem [ref=e284]:
+                  - text: Opened
+                  - generic "20 de abr. de 2026, 18:13 BRT" [ref=e285]: 15 days ago
+                - generic [ref=e286]: ·
+                - listitem [ref=e287]:
+                  - link "#30" [ref=e288] [cursor=pointer]:
+                    - /url: /dudung/26b16/issues/30
+            - generic [ref=e289]:
+              - heading "dudung/26b16 Platforms preparation and final discussion" [level=3] [ref=e290]:
+                - link "dudung/26b16" [ref=e292] [cursor=pointer]:
+                  - /url: /dudung/26b16
+                - generic [ref=e293]:
+                  - img [ref=e295]
+                  - link "Platforms preparation and final discussion" [ref=e298] [cursor=pointer]:
+                    - /url: /dudung/26b16/issues/25
+              - generic [ref=e302]: SK5010
+              - list [ref=e303]:
+                - listitem [ref=e304]: dudung
+                - generic [ref=e305]: ·
+                - listitem [ref=e306]:
+                  - img [ref=e308]
+                  - text: "3"
+                - generic [ref=e310]: ·
+                - listitem [ref=e311]:
+                  - text: Opened
+                  - generic "13 de abr. de 2026, 22:29 BRT" [ref=e312]: 22 days ago
+                - generic [ref=e313]: ·
+                - listitem [ref=e314]:
+                  - link "#25" [ref=e315] [cursor=pointer]:
+                    - /url: /dudung/26b16/issues/25
+            - generic [ref=e316]:
+              - heading "dudung/26b16 Platform preparation, motivation, knowledge summary, final exam type" [level=3] [ref=e317]:
+                - link "dudung/26b16" [ref=e319] [cursor=pointer]:
+                  - /url: /dudung/26b16
+                - generic [ref=e320]:
+                  - img [ref=e322]
+                  - link "Platform preparation, motivation, knowledge summary, final exam type" [ref=e325] [cursor=pointer]:
+                    - /url: /dudung/26b16/issues/27
+              - generic [ref=e329]: FI3271
+              - list [ref=e330]:
+                - listitem [ref=e331]: dudung
+                - generic [ref=e332]: ·
+                - listitem [ref=e333]:
+                  - img [ref=e335]
+                  - text: "23"
+                - generic [ref=e337]: ·
+                - listitem [ref=e338]:
+                  - text: Opened
+                  - generic "14 de abr. de 2026, 18:37 BRT" [ref=e339]: 21 days ago
+                - generic [ref=e340]: ·
+                - listitem [ref=e341]:
+                  - link "#27" [ref=e342] [cursor=pointer]:
+                    - /url: /dudung/26b16/issues/27
+            - generic [ref=e343]:
+              - heading "kubernetes/cloud-provider-gcp Service controller tries to add finalizer to service being deleted, causing errors" [level=3] [ref=e344]:
+                - link "kubernetes/cloud-provider-gcp" [ref=e346] [cursor=pointer]:
+                  - /url: /kubernetes/cloud-provider-gcp
+                - generic [ref=e347]:
+                  - img [ref=e349]
+                  - link "Service controller tries to add finalizer to service being deleted, causing errors" [ref=e352] [cursor=pointer]:
+                    - /url: /kubernetes/cloud-provider-gcp/issues/981
+              - generic [ref=e356]: needs-triage
+              - list [ref=e357]:
+                - listitem [ref=e358]: wpross
+                - generic [ref=e359]: ·
+                - listitem [ref=e360]:
+                  - img [ref=e362]
+                  - text: "3"
+                - generic [ref=e364]: ·
+                - listitem [ref=e365]:
+                  - text: Opened
+                  - generic "27 de fev. de 2026, 10:31 BRT" [ref=e366]: on 27 de fev.
+                - generic [ref=e367]: ·
+                - listitem [ref=e368]:
+                  - link "#981" [ref=e369] [cursor=pointer]:
+                    - /url: /kubernetes/cloud-provider-gcp/issues/981
+            - generic [ref=e370]:
+              - heading "jmelloy/pioneer-square Rename Alembic migration files to date-based format" [level=3] [ref=e371]:
+                - link "jmelloy/pioneer-square" [ref=e373] [cursor=pointer]:
+                  - /url: /jmelloy/pioneer-square
+                - generic [ref=e374]:
+                  - img [ref=e376]
+                  - link "Rename Alembic migration files to date-based format" [ref=e379] [cursor=pointer]:
+                    - /url: /jmelloy/pioneer-square/issues/190
+              - generic [ref=e381]:
+                - text: Problem The existing Alembic migration files use random hex revision IDs as filenames (e.g.
+                - emphasis [ref=e382]: a1b2c3d4e5f6
+                - text: _description.py), making it hard to understand the migration history at a glance. Proposed ...
+              - list [ref=e383]:
+                - listitem [ref=e384]: jmelloy
+                - generic [ref=e385]: ·
+                - listitem [ref=e386]:
+                  - text: Opened
+                  - generic "4 de mai. de 2026, 21:05 BRT" [ref=e387]: yesterday
+                - generic [ref=e388]: ·
+                - listitem [ref=e389]:
+                  - link "#190" [ref=e390] [cursor=pointer]:
+                    - /url: /jmelloy/pioneer-square/issues/190
+            - generic [ref=e391]:
+              - 'heading "gfargo/git-rewrite feat: post-rewrite recovery instructions (undo awareness)" [level=3] [ref=e392]':
+                - link "gfargo/git-rewrite" [ref=e394] [cursor=pointer]:
+                  - /url: /gfargo/git-rewrite
+                - generic [ref=e395]:
+                  - img [ref=e397]
+                  - 'link "feat: post-rewrite recovery instructions (undo awareness)" [ref=e400] [cursor=pointer]':
+                    - /url: /gfargo/git-rewrite/issues/7
+              - generic [ref=e402]:
+                - text: "Summary After every successful rewrite, print the pre-rewrite HEAD sha and the exact command needed to recover. Proposed output ``` History rewritten successfully. Pre-rewrite HEAD :"
+                - emphasis [ref=e403]: a1b2c3d4e5f6
+                - text: ...
+              - generic [ref=e404]:
+                - generic [ref=e407]: enhancement
+                - generic [ref=e410]: ux
+              - list [ref=e411]:
+                - listitem [ref=e412]: gfargo
+                - generic [ref=e413]: ·
+                - listitem [ref=e414]:
+                  - text: Opened
+                  - generic "2 de mar. de 2026, 12:11 BRT" [ref=e415]: on 2 de mar.
+                - generic [ref=e416]: ·
+                - listitem [ref=e417]:
+                  - link "#7" [ref=e418] [cursor=pointer]:
+                    - /url: /gfargo/git-rewrite/issues/7
+            - generic [ref=e419]:
+              - heading "rolandpg/zettelforge Add IPv6 address extraction" [level=3] [ref=e420]:
+                - link "rolandpg/zettelforge" [ref=e422] [cursor=pointer]:
+                  - /url: /rolandpg/zettelforge
+                - generic [ref=e423]:
+                  - img [ref=e425]
+                  - link "Add IPv6 address extraction" [ref=e428] [cursor=pointer]:
+                    - /url: /rolandpg/zettelforge/issues/47
+              - generic [ref=e429]:
+                - generic [ref=e432]: entity-patterns
+                - generic [ref=e435]: good first issue
+              - list [ref=e436]:
+                - listitem [ref=e437]: rolandpg
+                - generic [ref=e438]: ·
+                - listitem [ref=e439]:
+                  - text: Opened
+                  - generic "15 de abr. de 2026, 16:02 BRT" [ref=e440]: 20 days ago
+                - generic [ref=e441]: ·
+                - listitem [ref=e442]:
+                  - link "#47" [ref=e443] [cursor=pointer]:
+                    - /url: /rolandpg/zettelforge/issues/47
+            - generic [ref=e444]:
+              - heading "dudung/26b16 Intro, platform preparation, motivation and expectation" [level=3] [ref=e445]:
+                - link "dudung/26b16" [ref=e447] [cursor=pointer]:
+                  - /url: /dudung/26b16
+                - generic [ref=e448]:
+                  - img [ref=e450]
+                  - link "Intro, platform preparation, motivation and expectation" [ref=e453] [cursor=pointer]:
+                    - /url: /dudung/26b16/issues/2
+              - generic [ref=e457]: NT6094
+              - list [ref=e458]:
+                - listitem [ref=e459]: dudung
+                - generic [ref=e460]: ·
+                - listitem [ref=e461]:
+                  - img [ref=e463]
+                  - text: "3"
+                - generic [ref=e465]: ·
+                - listitem [ref=e466]:
+                  - text: Opened
+                  - generic "10 de fev. de 2026, 22:55 BRT" [ref=e467]: on 10 de fev.
+                - generic [ref=e468]: ·
+                - listitem [ref=e469]:
+                  - link "#2" [ref=e470] [cursor=pointer]:
+                    - /url: /dudung/26b16/issues/2
+          - navigation "Pagination" [ref=e473]:
+            - generic [ref=e474]:
+              - generic [ref=e475]:
+                - img [ref=e476]
+                - text: Previous
+              - link "Page 1" [ref=e478] [cursor=pointer]:
+                - /url: https://github.com/search?q=a1b2c3d4e5f6+OR+%22Cannot+read+properties+of+undefined+reading+tenantId%22&type=issues&p=1
+                - text: "1"
+              - link "Page 2" [ref=e479] [cursor=pointer]:
+                - /url: https://github.com/search?q=a1b2c3d4e5f6+OR+%22Cannot+read+properties+of+undefined+reading+tenantId%22&type=issues&p=2
+                - text: "2"
+              - link "Page 3" [ref=e480] [cursor=pointer]:
+                - /url: https://github.com/search?q=a1b2c3d4e5f6+OR+%22Cannot+read+properties+of+undefined+reading+tenantId%22&type=issues&p=3
+                - text: "3"
+              - link "Page 4" [ref=e481] [cursor=pointer]:
+                - /url: https://github.com/search?q=a1b2c3d4e5f6+OR+%22Cannot+read+properties+of+undefined+reading+tenantId%22&type=issues&p=4
+                - text: "4"
+              - link "Page 5" [ref=e482] [cursor=pointer]:
+                - /url: https://github.com/search?q=a1b2c3d4e5f6+OR+%22Cannot+read+properties+of+undefined+reading+tenantId%22&type=issues&p=5
+                - text: "5"
+              - link "Page 6" [ref=e483] [cursor=pointer]:
+                - /url: https://github.com/search?q=a1b2c3d4e5f6+OR+%22Cannot+read+properties+of+undefined+reading+tenantId%22&type=issues&p=6
+                - text: "6"
+              - link "Page 7..." [ref=e484] [cursor=pointer]:
+                - /url: https://github.com/search?q=a1b2c3d4e5f6+OR+%22Cannot+read+properties+of+undefined+reading+tenantId%22&type=issues&p=7
+                - text: "7"
+              - text: …
+              - link "Page 43" [ref=e485] [cursor=pointer]:
+                - /url: https://github.com/search?q=a1b2c3d4e5f6+OR+%22Cannot+read+properties+of+undefined+reading+tenantId%22&type=issues&p=43
+                - text: "43"
+              - link "Next Page" [ref=e486] [cursor=pointer]:
+                - /url: https://github.com/search?q=a1b2c3d4e5f6+OR+%22Cannot+read+properties+of+undefined+reading+tenantId%22&type=issues&p=2
+                - text: Next
+                - img [ref=e487]
+          - generic [ref=e490]:
+            - generic [ref=e491]:
+              - img "Issue origami icon" [ref=e493]
+              - heading "Learn how you can use GitHub Issues to plan and track your work." [level=2] [ref=e494]
+              - generic [ref=e495]: Save views for sprints, backlogs, teams, or releases. Rank, sort, and filter issues to suit the occasion. The possibilities are endless.
+              - link "Learn more about GitHub Issues" [ref=e496] [cursor=pointer]:
+                - /url: https://docs.github.com/issues
+                - text: Learn more about GitHub Issues
+                - img [ref=e497]
+            - generic [ref=e499]:
+              - generic [ref=e500]:
+                - img [ref=e501]
+                - text: ProTip!
+              - generic [ref=e503]:
+                - text: Press the
+                - generic [ref=e504]: /
+                - text: key to activate the search input again and adjust your query.

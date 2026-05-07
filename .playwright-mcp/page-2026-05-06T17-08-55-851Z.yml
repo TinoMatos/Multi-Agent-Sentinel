@@ -1,0 +1,488 @@
+- generic [ref=e2]:
+  - region
+  - generic [ref=e3]:
+    - link "Skip to content" [ref=e4] [cursor=pointer]:
+      - /url: "#start-of-content"
+    - banner [ref=e6]:
+      - heading "Navigation Menu" [level=2] [ref=e7]
+      - generic [ref=e9]:
+        - button "Toggle navigation" [ref=e11] [cursor=pointer]
+        - link "Homepage" [ref=e17] [cursor=pointer]:
+          - /url: /
+          - img [ref=e18]
+        - generic [ref=e20]:
+          - link "Sign in" [ref=e21] [cursor=pointer]:
+            - /url: /login?return_to=https%3A%2F%2Fgithub.com%2Fsearch%3Fq%3Da1b2c3d4e5f6%26type%3Dcommits
+          - button "Appearance settings" [ref=e24] [cursor=pointer]:
+            - img
+  - main [ref=e27]:
+    - generic [ref=e30]:
+      - heading "commits Search Results · a1b2c3d4e5f6" [level=1] [ref=e31]
+      - generic [ref=e34]:
+        - generic [ref=e35]:
+          - generic [ref=e36]:
+            - heading "Filter by" [level=2] [ref=e37]
+            - list "Filter by" [ref=e42]:
+              - listitem [ref=e43]:
+                - list [ref=e44]:
+                  - listitem [ref=e45]:
+                    - link "Code (...) results" [ref=e46] [cursor=pointer]:
+                      - /url: https://github.com/search?q=a1b2c3d4e5f6&type=code
+                      - generic:
+                        - img
+                      - generic [ref=e47]:
+                        - generic [ref=e48]: Code
+                        - generic:
+                          - generic: ...
+                          - generic: (...)
+                          - generic: results
+                  - listitem [ref=e49]:
+                    - link "Repositories results" [ref=e50] [cursor=pointer]:
+                      - /url: https://github.com/search?q=a1b2c3d4e5f6&type=repositories
+                      - generic:
+                        - img
+                      - generic [ref=e51]:
+                        - generic [ref=e52]: Repositories
+                        - generic:
+                          - generic: results
+                  - listitem [ref=e53]:
+                    - link "Issues results" [ref=e54] [cursor=pointer]:
+                      - /url: https://github.com/search?q=a1b2c3d4e5f6&type=issues
+                      - generic:
+                        - img
+                      - generic [ref=e55]:
+                        - generic [ref=e56]: Issues
+                        - generic:
+                          - generic: results
+                  - listitem [ref=e57]:
+                    - link "Pull requests results" [ref=e58] [cursor=pointer]:
+                      - /url: https://github.com/search?q=a1b2c3d4e5f6&type=pullrequests
+                      - generic:
+                        - img
+                      - generic [ref=e59]:
+                        - generic [ref=e60]: Pull requests
+                        - generic:
+                          - generic: results
+                  - listitem [ref=e61]:
+                    - link "Discussions results" [ref=e62] [cursor=pointer]:
+                      - /url: https://github.com/search?q=a1b2c3d4e5f6&type=discussions
+                      - generic:
+                        - img
+                      - generic [ref=e63]:
+                        - generic [ref=e64]: Discussions
+                        - generic:
+                          - generic: results
+                  - listitem [ref=e65]:
+                    - link "Users results" [ref=e66] [cursor=pointer]:
+                      - /url: https://github.com/search?q=a1b2c3d4e5f6&type=users
+                      - generic:
+                        - img
+                      - generic [ref=e67]:
+                        - generic [ref=e68]: Users
+                        - generic:
+                          - generic: results
+                  - listitem [ref=e69]:
+                    - link "Commits results" [ref=e70] [cursor=pointer]:
+                      - /url: https://github.com/search?q=a1b2c3d4e5f6&type=commits
+                      - generic:
+                        - img
+                      - generic [ref=e71]:
+                        - generic [ref=e72]: Commits
+                        - generic:
+                          - generic: results
+                  - listitem [ref=e73]:
+                    - link "Packages results" [ref=e74] [cursor=pointer]:
+                      - /url: https://github.com/search?q=a1b2c3d4e5f6&type=registrypackages
+                      - generic:
+                        - img
+                      - generic [ref=e75]:
+                        - generic [ref=e76]: Packages
+                        - generic:
+                          - generic: results
+                  - listitem [ref=e77]:
+                    - link "Wikis results" [ref=e78] [cursor=pointer]:
+                      - /url: https://github.com/search?q=a1b2c3d4e5f6&type=wikis
+                      - generic:
+                        - img
+                      - generic [ref=e79]:
+                        - generic [ref=e80]: Wikis
+                        - generic:
+                          - generic: results
+                  - listitem [ref=e81]:
+                    - link "Topics results" [ref=e82] [cursor=pointer]:
+                      - /url: https://github.com/search?q=a1b2c3d4e5f6&type=topics
+                      - generic:
+                        - img
+                      - generic [ref=e83]:
+                        - generic [ref=e84]: Topics
+                        - generic:
+                          - generic: results
+                  - listitem [ref=e85]:
+                    - link "Marketplace results" [ref=e86] [cursor=pointer]:
+                      - /url: https://github.com/search?q=a1b2c3d4e5f6&type=marketplace
+                      - generic:
+                        - img
+                      - generic [ref=e87]:
+                        - generic [ref=e88]: Marketplace
+                        - generic:
+                          - generic: results
+              - listitem [ref=e89]:
+                - heading "Advanced" [level=3] [ref=e91]
+                - list "Advanced" [ref=e92]:
+                  - listitem [ref=e93]:
+                    - button "Organization" [ref=e94] [cursor=pointer]:
+                      - generic:
+                        - img
+                      - generic "Organization" [ref=e98]
+                  - listitem [ref=e99]:
+                    - button "Author" [ref=e100] [cursor=pointer]:
+                      - generic:
+                        - img
+                      - generic "Author" [ref=e104]
+                  - listitem [ref=e105]:
+                    - button "Committer" [ref=e106] [cursor=pointer]:
+                      - generic:
+                        - img
+                      - generic "Committer" [ref=e110]
+                  - listitem [ref=e111]:
+                    - button "Author email" [ref=e112] [cursor=pointer]:
+                      - generic:
+                        - img
+                      - generic "Author email" [ref=e116]
+                  - listitem [ref=e117]:
+                    - button "Committer email" [ref=e118] [cursor=pointer]:
+                      - generic:
+                        - img
+                      - generic "Committer email" [ref=e122]
+                  - listitem [ref=e123]:
+                    - button "Merge commits" [ref=e124] [cursor=pointer]:
+                      - generic:
+                        - img
+                      - generic "Merge commits" [ref=e128]
+                  - listitem [ref=e129]:
+                    - button "Hash" [ref=e130] [cursor=pointer]:
+                      - generic:
+                        - img
+                      - generic "Hash" [ref=e134]
+                  - listitem [ref=e135]:
+                    - button "Parent hash" [ref=e136] [cursor=pointer]:
+                      - generic:
+                        - img
+                      - generic "Parent hash" [ref=e140]
+                  - listitem [ref=e141]:
+                    - button "Tree hash" [ref=e142] [cursor=pointer]:
+                      - generic:
+                        - img
+                      - generic "Tree hash" [ref=e146]
+                  - listitem [ref=e147]:
+                    - link "Public" [ref=e148] [cursor=pointer]:
+                      - /url: https://github.com/search?q=a1b2c3d4e5f6+is%3Apublic&type=commits
+                      - generic:
+                        - img
+                      - generic "Public" [ref=e152]
+                  - listitem [ref=e153]:
+                    - link "Private" [ref=e154] [cursor=pointer]:
+                      - /url: https://github.com/search?q=a1b2c3d4e5f6+is%3Aprivate&type=commits
+                      - generic:
+                        - img
+                      - generic "Private" [ref=e158]
+              - listitem [ref=e159]
+              - listitem [ref=e160]:
+                - link "Advanced search" [ref=e161] [cursor=pointer]:
+                  - /url: /search/advanced
+                  - generic:
+                    - img
+                  - generic [ref=e163]: Advanced search
+          - slider "Draggable pane splitter" [ref=e165]
+        - generic [ref=e169]:
+          - generic [ref=e171]:
+            - generic [ref=e172]:
+              - generic [ref=e173]:
+                - generic [ref=e174]: 1.3k results
+                - generic [ref=e175]: (1 s)
+              - heading "1.3k results" [active] [level=2] [ref=e176]
+            - generic [ref=e177]:
+              - 'button "Sort by: Best match" [ref=e179] [cursor=pointer]':
+                - generic [ref=e181]: "Sort by: Best match"
+                - generic:
+                  - img
+              - button "Open column options" [ref=e183] [cursor=pointer]:
+                - img [ref=e184]
+          - generic [ref=e188]:
+            - generic [ref=e189]:
+              - 'heading "AlanConstantino/doc-search : feat: support hash-based site directory lookup" [level=3] [ref=e190]':
+                - link "AlanConstantino/doc-search" [ref=e192] [cursor=pointer]:
+                  - /url: /AlanConstantino/doc-search
+                - generic [ref=e193]: ":"
+                - 'link "feat: support hash-based site directory lookup" [ref=e196] [cursor=pointer]':
+                  - /url: /AlanConstantino/doc-search/commit/2d88ed7d27557a79d8da416187f3d1b1e817b5cd
+              - generic [ref=e198]:
+                - text: "get_site_dir() now accepts: - URLs (http://, https://) - Existing directory paths - Hash only (e.g., '"
+                - emphasis [ref=e199]: a1b2c3d4e5f6
+                - text: "') - Prefixed hash (e.g…"
+              - list [ref=e200]:
+                - listitem [ref=e201]:
+                  - generic [ref=e202]:
+                    - link "AlanConstantino" [ref=e203] [cursor=pointer]:
+                      - /url: /AlanConstantino/doc-search/commits?author=AlanConstantino
+                      - generic [ref=e204]: AlanConstantino
+                    - generic [ref=e205]: committed
+                  - generic "12 de fev. de 2026, 05:24 BRT" [ref=e206]: on 12 de fev.
+                - generic [ref=e207]: ·
+                - listitem [ref=e208]:
+                  - button "Copy full commit hash" [ref=e210] [cursor=pointer]:
+                    - tooltip "Copy full commit hash" [ref=e213]: 2d88ed7
+            - generic [ref=e214]:
+              - 'heading "BlagoVpn/Pavlik-VPN : fix: resolve duplicate migration revision a1b2c3d4e5f6" [level=3] [ref=e215]':
+                - link "BlagoVpn/Pavlik-VPN" [ref=e217] [cursor=pointer]:
+                  - /url: /BlagoVpn/Pavlik-VPN
+                - generic [ref=e218]: ":"
+                - 'link "fix: resolve duplicate migration revision a1b2c3d4e5f6" [ref=e221] [cursor=pointer]':
+                  - /url: /BlagoVpn/Pavlik-VPN/commit/609f01de55dbcf5cb79b01ae5457019411e12193
+                  - text: "fix: resolve duplicate migration revision"
+                  - emphasis [ref=e222]: a1b2c3d4e5f6
+              - generic [ref=e224]:
+                - text: add_vpn_uuid.py already used revision
+                - emphasis [ref=e225]: a1b2c3d4e5f6
+                - text: . Renamed our promo/ban/lang migration to c3d4e5f6a7b8 and updated b2c3d4e5f6a7 to depe…
+              - list [ref=e226]:
+                - listitem [ref=e227]:
+                  - generic [ref=e228]:
+                    - link "claude" [ref=e229] [cursor=pointer]:
+                      - /url: /BlagoVpn/Pavlik-VPN/commits?author=claude
+                      - generic [ref=e230]: claude
+                    - generic [ref=e231]: committed
+                  - generic "12 de abr. de 2026, 10:09 BRT" [ref=e232]: 24 days ago
+                - generic [ref=e233]: ·
+                - listitem [ref=e234]:
+                  - button "Copy full commit hash" [ref=e236] [cursor=pointer]:
+                    - tooltip "Copy full commit hash" [ref=e239]: 609f01d
+                  - button "Verified" [ref=e240] [cursor=pointer]
+            - generic [ref=e241]:
+              - 'heading "BlagoVpn/Pavlik-VPN : fix: resolve duplicate migration revision a1b2c3d4e5f6" [level=3] [ref=e242]':
+                - link "BlagoVpn/Pavlik-VPN" [ref=e244] [cursor=pointer]:
+                  - /url: /BlagoVpn/Pavlik-VPN
+                - generic [ref=e245]: ":"
+                - 'link "fix: resolve duplicate migration revision a1b2c3d4e5f6" [ref=e248] [cursor=pointer]':
+                  - /url: /BlagoVpn/Pavlik-VPN/commit/7e5901637377980a5e269d1da25822d95cf51139
+                  - text: "fix: resolve duplicate migration revision"
+                  - emphasis [ref=e249]: a1b2c3d4e5f6
+              - generic [ref=e251]:
+                - text: add_vpn_uuid.py already used revision
+                - emphasis [ref=e252]: a1b2c3d4e5f6
+                - text: . Renamed our promo/ban/lang migration to c3d4e5f6a7b8 and updated b2c3d4e5f6a7 to depe…
+              - list [ref=e253]:
+                - listitem [ref=e254]:
+                  - generic [ref=e255]:
+                    - link "claude" [ref=e256] [cursor=pointer]:
+                      - /url: /BlagoVpn/Pavlik-VPN/commits?author=claude
+                      - generic [ref=e257]: claude
+                    - generic [ref=e258]: committed
+                  - generic "12 de abr. de 2026, 10:09 BRT" [ref=e259]: 24 days ago
+                - generic [ref=e260]: ·
+                - listitem [ref=e261]:
+                  - button "Copy full commit hash" [ref=e263] [cursor=pointer]:
+                    - tooltip "Copy full commit hash" [ref=e266]: "7e59016"
+                  - button "Verified" [ref=e267] [cursor=pointer]
+            - generic [ref=e268]:
+              - 'heading "JackybigW/vibe-coding-studio : fix(alembic): fix migration chain - set down_revision to a1b2c3d4e5f6" [level=3] [ref=e269]':
+                - link "JackybigW/vibe-coding-studio" [ref=e271] [cursor=pointer]:
+                  - /url: /JackybigW/vibe-coding-studio
+                - generic [ref=e272]: ":"
+                - 'link "fix(alembic): fix migration chain - set down_revision to a1b2c3d4e5f6" [ref=e275] [cursor=pointer]':
+                  - /url: /JackybigW/vibe-coding-studio/commit/5c6e53afe8abbfdd55ed431d287f62bc86ff73fa
+                  - text: "fix(alembic): fix migration chain - set down_revision to"
+                  - emphasis [ref=e276]: a1b2c3d4e5f6
+              - list [ref=e277]:
+                - listitem [ref=e278]:
+                  - generic [ref=e279]:
+                    - generic [ref=e280]: Jacky Wang
+                    - generic [ref=e281]: authored and
+                    - generic [ref=e282]: Jacky Wang
+                    - generic [ref=e283]: committed
+                  - generic "26 de abr. de 2026, 00:37 BRT" [ref=e284]: 10 days ago
+                - generic [ref=e285]: ·
+                - listitem [ref=e286]:
+                  - button "Copy full commit hash" [ref=e288] [cursor=pointer]:
+                    - tooltip "Copy full commit hash" [ref=e291]: 5c6e53a
+            - generic [ref=e292]:
+              - 'heading "miczu71/heiko-heatpump-ha : Replace real MN example with fake placeholder A1B2C3D4E5F6" [level=3] [ref=e293]':
+                - link "miczu71/heiko-heatpump-ha" [ref=e295] [cursor=pointer]:
+                  - /url: /miczu71/heiko-heatpump-ha
+                - generic [ref=e296]: ":"
+                - link "Replace real MN example with fake placeholder A1B2C3D4E5F6" [ref=e299] [cursor=pointer]:
+                  - /url: /miczu71/heiko-heatpump-ha/commit/e944dba491464415b4098e7876e56df1bdfee217
+                  - text: Replace real MN example with fake placeholder
+                  - emphasis [ref=e300]: A1B2C3D4E5F6
+              - list [ref=e301]:
+                - listitem [ref=e302]:
+                  - generic [ref=e303]:
+                    - link "miczu71" [ref=e304] [cursor=pointer]:
+                      - /url: /miczu71/heiko-heatpump-ha/commits?author=miczu71
+                      - generic [ref=e305]: miczu71
+                    - generic [ref=e306]: committed
+                  - generic "20 de abr. de 2026, 08:15 BRT" [ref=e307]: 16 days ago
+                - generic [ref=e308]: ·
+                - listitem [ref=e309]:
+                  - button "Copy full commit hash" [ref=e311] [cursor=pointer]:
+                    - tooltip "Copy full commit hash" [ref=e314]: e944dba
+            - generic [ref=e315]:
+              - 'heading "jopderidder-fresk/sales-lead-gen : 5 failing, 2 successful, and 1 skipped checks Fix alembic cycle: duplicate revision ID a1b2c3d4e5f6" [level=3] [ref=e316]':
+                - link "jopderidder-fresk/sales-lead-gen" [ref=e318] [cursor=pointer]:
+                  - /url: /jopderidder-fresk/sales-lead-gen
+                - generic [ref=e319]: ":"
+                - generic [ref=e320]:
+                  - button "5 failing, 2 successful, and 1 skipped checks" [ref=e321] [cursor=pointer]:
+                    - img [ref=e322]
+                  - 'link "Fix alembic cycle: duplicate revision ID a1b2c3d4e5f6" [ref=e325] [cursor=pointer]':
+                    - /url: /jopderidder-fresk/sales-lead-gen/commit/05d370aee9d56e0baaa171d68f51724620a827b4
+                    - text: "Fix alembic cycle: duplicate revision ID"
+                    - emphasis [ref=e326]: a1b2c3d4e5f6
+              - list [ref=e327]:
+                - listitem [ref=e328]:
+                  - generic [ref=e329]:
+                    - link "jopderidder-fresk" [ref=e330] [cursor=pointer]:
+                      - /url: /jopderidder-fresk/sales-lead-gen/commits?author=jopderidder-fresk
+                      - generic [ref=e331]: jopderidder-fresk
+                    - generic [ref=e332]: committed
+                  - generic "4 de abr. de 2026, 08:06 BRT" [ref=e333]: on 4 de abr.
+                - generic [ref=e334]: ·
+                - listitem [ref=e335]:
+                  - button "Copy full commit hash" [ref=e337] [cursor=pointer]:
+                    - tooltip "Copy full commit hash" [ref=e340]: 05d370a
+            - generic [ref=e341]:
+              - 'heading "4ahul/dhara-redevelopment : fix: remove duplicate a1b2c3d4e5f6 migration, add e1f2a3b4c5d6 merge-…" [level=3] [ref=e342]':
+                - link "4ahul/dhara-redevelopment" [ref=e344] [cursor=pointer]:
+                  - /url: /4ahul/dhara-redevelopment
+                - generic [ref=e345]: ":"
+                - 'link "fix: remove duplicate a1b2c3d4e5f6 migration, add e1f2a3b4c5d6 merge-…" [ref=e348] [cursor=pointer]':
+                  - /url: /4ahul/dhara-redevelopment/commit/9788b9f0071110305614abd5e6488e3d50d500d1
+                  - text: "fix: remove duplicate"
+                  - emphasis [ref=e349]: a1b2c3d4e5f6
+                  - text: migration, add e1f2a3b4c5d6 merge-…
+              - list [ref=e350]:
+                - listitem [ref=e351]:
+                  - generic [ref=e352]:
+                    - link "4ahul" [ref=e353] [cursor=pointer]:
+                      - /url: /4ahul/dhara-redevelopment/commits?author=4ahul
+                      - generic [ref=e354]: 4ahul
+                    - generic [ref=e355]: committed
+                  - generic "1 de mai. de 2026, 09:46 BRT" [ref=e356]: 5 days ago
+                - generic [ref=e357]: ·
+                - listitem [ref=e358]:
+                  - button "Copy full commit hash" [ref=e360] [cursor=pointer]:
+                    - tooltip "Copy full commit hash" [ref=e363]: 9788b9f
+            - generic [ref=e364]:
+              - 'heading "mina131225-jpg/moukeru-backend : Delete a1b2c3d4e5f6_add_avatar_key.py" [level=3] [ref=e365]':
+                - link "mina131225-jpg/moukeru-backend" [ref=e367] [cursor=pointer]:
+                  - /url: /mina131225-jpg/moukeru-backend
+                - generic [ref=e368]: ":"
+                - link "Delete a1b2c3d4e5f6_add_avatar_key.py" [ref=e371] [cursor=pointer]:
+                  - /url: /mina131225-jpg/moukeru-backend/commit/79ba936d86d618e9e764a25fc60d7ad02c7fbd5c
+                  - text: Delete
+                  - emphasis [ref=e372]: a1b2c3d4e5f6
+                  - text: _add_avatar_key.py
+              - list [ref=e373]:
+                - listitem [ref=e374]:
+                  - generic [ref=e375]:
+                    - link "mina131225-jpg" [ref=e376] [cursor=pointer]:
+                      - /url: /mina131225-jpg/moukeru-backend/commits?author=mina131225-jpg
+                      - generic [ref=e377]: mina131225-jpg
+                    - generic [ref=e378]: committed
+                  - generic "3 de abr. de 2026, 22:02 BRT" [ref=e379]: on 3 de abr.
+                - generic [ref=e380]: ·
+                - listitem [ref=e381]:
+                  - button "Copy full commit hash" [ref=e383] [cursor=pointer]:
+                    - tooltip "Copy full commit hash" [ref=e386]: 79ba936
+                  - button "Verified" [ref=e387] [cursor=pointer]
+            - generic [ref=e388]:
+              - 'heading "timwonderer/classroom-economy : 1 failing and 7 successful checks Fix migration revision ID collision (a1b2c3d4e5f6 already used by ren…" [level=3] [ref=e389]':
+                - link "timwonderer/classroom-economy" [ref=e391] [cursor=pointer]:
+                  - /url: /timwonderer/classroom-economy
+                - generic [ref=e392]: ":"
+                - generic [ref=e393]:
+                  - button "1 failing and 7 successful checks" [ref=e394] [cursor=pointer]:
+                    - img [ref=e395]
+                  - link "Fix migration revision ID collision (a1b2c3d4e5f6 already used by ren…" [ref=e398] [cursor=pointer]:
+                    - /url: /timwonderer/classroom-economy/commit/e3d0ac335a7d984ca6b2f895507b5a5f9b448f63
+                    - text: Fix migration revision ID collision (
+                    - emphasis [ref=e399]: a1b2c3d4e5f6
+                    - text: already used by ren…
+              - generic [ref=e401]:
+                - text: Rename migration to 9845e9a9baca and update down_revision to b5c6d7e8f9g0 (the actual chain head). Previous revision ID collided with
+                - emphasis [ref=e402]: a1b…
+              - list [ref=e403]:
+                - listitem [ref=e404]:
+                  - generic [ref=e405]:
+                    - link "timwonderer" [ref=e406] [cursor=pointer]:
+                      - /url: /timwonderer/classroom-economy/commits?author=timwonderer
+                      - generic [ref=e407]: timwonderer
+                    - text: and
+                    - link "claude" [ref=e408] [cursor=pointer]:
+                      - /url: /timwonderer/classroom-economy/commits?author=claude
+                      - generic [ref=e409]: claude
+                    - generic [ref=e410]: committed
+                  - generic "8 de abr. de 2026, 02:16 BRT" [ref=e411]: 28 days ago
+                - generic [ref=e412]: ·
+                - listitem [ref=e413]:
+                  - button "Copy full commit hash" [ref=e415] [cursor=pointer]:
+                    - tooltip "Copy full commit hash" [ref=e418]: e3d0ac3
+            - generic [ref=e419]:
+              - 'heading "cleitonSam/IA : 1 failing check fix(alembic): remove arquivo migration duplicado a1b2c3d4e5f6_mapeame…" [level=3] [ref=e420]':
+                - link "cleitonSam/IA" [ref=e422] [cursor=pointer]:
+                  - /url: /cleitonSam/IA
+                - generic [ref=e423]: ":"
+                - generic [ref=e424]:
+                  - button "1 failing check" [ref=e425] [cursor=pointer]:
+                    - img [ref=e426]
+                  - 'link "fix(alembic): remove arquivo migration duplicado a1b2c3d4e5f6_mapeame…" [ref=e429] [cursor=pointer]':
+                    - /url: /cleitonSam/IA/commit/a7adc6efc967ebafd801e558350b378860206a2d
+                    - text: "fix(alembic): remove arquivo migration duplicado"
+                    - emphasis [ref=e430]: a1b2c3d4e5f6
+                    - text: _mapeame…
+              - list [ref=e431]:
+                - listitem [ref=e432]:
+                  - generic [ref=e433]:
+                    - link "cleitonSam" [ref=e434] [cursor=pointer]:
+                      - /url: /cleitonSam/IA/commits?author=cleitonSam
+                      - generic [ref=e435]: cleitonSam
+                    - generic [ref=e436]: committed
+                  - generic "29 de abr. de 2026, 12:32 BRT" [ref=e437]: 7 days ago
+                - generic [ref=e438]: ·
+                - listitem [ref=e439]:
+                  - button "Copy full commit hash" [ref=e441] [cursor=pointer]:
+                    - tooltip "Copy full commit hash" [ref=e444]: a7adc6e
+          - navigation "Pagination" [ref=e447]:
+            - generic [ref=e448]:
+              - generic [ref=e449]:
+                - img [ref=e450]
+                - text: Previous
+              - link "Page 1" [ref=e452] [cursor=pointer]:
+                - /url: https://github.com/search?q=a1b2c3d4e5f6&type=commits&p=1
+                - text: "1"
+              - link "Page 2" [ref=e453] [cursor=pointer]:
+                - /url: https://github.com/search?q=a1b2c3d4e5f6&type=commits&p=2
+                - text: "2"
+              - link "Page 3" [ref=e454] [cursor=pointer]:
+                - /url: https://github.com/search?q=a1b2c3d4e5f6&type=commits&p=3
+                - text: "3"
+              - link "Page 4" [ref=e455] [cursor=pointer]:
+                - /url: https://github.com/search?q=a1b2c3d4e5f6&type=commits&p=4
+                - text: "4"
+              - link "Page 5" [ref=e456] [cursor=pointer]:
+                - /url: https://github.com/search?q=a1b2c3d4e5f6&type=commits&p=5
+                - text: "5"
+              - link "Page 6" [ref=e457] [cursor=pointer]:
+                - /url: https://github.com/search?q=a1b2c3d4e5f6&type=commits&p=6
+                - text: "6"
+              - link "Page 7..." [ref=e458] [cursor=pointer]:
+                - /url: https://github.com/search?q=a1b2c3d4e5f6&type=commits&p=7
+                - text: "7"
+              - text: …
+              - link "Page 100" [ref=e459] [cursor=pointer]:
+                - /url: https://github.com/search?q=a1b2c3d4e5f6&type=commits&p=100
+                - text: "100"
+              - link "Next Page" [ref=e460] [cursor=pointer]:
+                - /url: https://github.com/search?q=a1b2c3d4e5f6&type=commits&p=2
+                - text: Next
+                - img [ref=e461]

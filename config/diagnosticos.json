@@ -1,0 +1,10 @@
+{
+  "_comment": "Templates de conclusao por tipo de erro. Adicione novos tipos sem mexer em codigo.",
+  "templates": {
+    "EXTERNAL_API_TIMEOUT": "Falha em dependencia externa: API de terceiro retornando timeout/5xx (ver stacktrace para upstream). Recomendacao: ativar circuit breaker, exibir fallback ao usuario e abrir ticket com o provedor.",
+    "TIMEOUT_DB": "Query lenta no MongoDB causando timeout. Provavel ausencia de indice na consulta de auditoria. Recomendacao: criar indice composto e revisar plano de execucao via explain().",
+    "OOM_KILLED": "Memory leak — heap cresce ~50MB/h ate atingir o limite do pod, causando restart pelo oom-killer. Recomendacao: profile de heap (heapdump) na ultima versao estavel e bisseccao por commit.",
+    "HTTP_502": "Burst de 5xx durante janela curta (rolling restart). Sintoma auto-recuperado — pode ser falso positivo decorrente de manutencao.",
+    "HTTP_500": "Erro de aplicacao 500 sem deploy correlato direto — investigar logs da janela e correlacao com mudancas de configuracao/feature flag."
+  }
+}

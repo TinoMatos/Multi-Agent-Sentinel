@@ -1,0 +1,9 @@
+.env
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+reports/*.md
+!reports/.gitkeep
+node_modules/
