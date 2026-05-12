@@ -29,6 +29,14 @@ def _heuristicas(conclusao: str, evidencias: list[dict[str, Any]]) -> list[str]:
         motivos.append("conclusao cita deploy mas nao ha evidencia tipo=commit")
     if "grafana" not in tipos and any(k in conclusao.lower() for k in ("cpu", "latencia", "spike")):
         motivos.append("conclusao cita metrica mas nao ha evidencia tipo=grafana")
+    # Modo degradado: se a maioria das evidencias vem de fallback deterministico,
+    # nao houve confirmacao externa real — vetar publicacao.
+    degradadas = sum(1 for e in evidencias if "degradado" in (e.get("nota") or "").lower())
+    if evidencias and degradadas / len(evidencias) > 0.5:
+        motivos.append(
+            f"maioria das evidencias em modo degradado ({degradadas}/{len(evidencias)}) — "
+            f"sem confirmacao externa via MCP"
+        )
     return motivos
 
 

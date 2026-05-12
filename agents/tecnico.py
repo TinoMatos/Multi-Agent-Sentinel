@@ -3,13 +3,9 @@
 Fase 3: usa o Claude Agent SDK com MCPs em uma unica sessao. O LLM decide
 quais tools chamar (ex.: ler runbook, navegar na URL), e devolve uma lista
 JSON de evidencias.
-
-Mantemos os helpers deterministicos abaixo — sao usados pelo Critic e por
-testes sem API key.
 """
 from __future__ import annotations
 
-from datetime import datetime, timedelta
 from typing import Any
 
 from agents._sdk_bridge import query_mcp
@@ -54,9 +50,6 @@ def _build_system() -> str:
     )
 
 
-SYSTEM = _build_system()  # mantido por compatibilidade; coletar() rebuilda.
-
-
 def disponivel() -> bool:
     from agents import _llm
     return _llm.disponivel()
@@ -85,35 +78,3 @@ async def coletar(hipotese: str) -> list[dict[str, Any]]:
         )
         evidencias.extend(gh_evid)
     return evidencias
-
-
-# ---------- helpers deterministicos (usados por testes e Critic) ----------
-
-def commit_dentro_da_janela(commit_ts: datetime, incidente_ts: datetime, janela_min: int = 30) -> bool:
-    if commit_ts > incidente_ts:
-        return False
-    return incidente_ts - commit_ts <= timedelta(minutes=janela_min)
-
-
-def extrair_sintomas_do_log(log: str, limite_linhas: int = 20) -> list[str]:
-    sintomas = []
-    for linha in log.splitlines():
-        l = linha.strip()
-        if not l:
-            continue
-        if any(k in l.lower() for k in ("error", "exception", "traceback", "fatal", "panic")):
-            sintomas.append(l)
-        if len(sintomas) >= limite_linhas:
-            break
-    return sintomas
-
-
-def confianca_visual(playwright_resultado: dict[str, Any]) -> float:
-    status = playwright_resultado.get("http_status")
-    if status and status >= 500:
-        return 0.95
-    if playwright_resultado.get("erro_visivel_no_dom"):
-        return 0.85
-    if status == 200:
-        return 0.10
-    return 0.50

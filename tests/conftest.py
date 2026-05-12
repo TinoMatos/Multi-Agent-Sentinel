@@ -23,6 +23,13 @@ def _no_api_key(monkeypatch):
     _llm.chat.cache_clear()
 
 
+@pytest.fixture(autouse=True)
+def _isolar_traces(tmp_path_factory, monkeypatch):
+    """Evita que testes polluam data/traces/ com runs de mongomock."""
+    from agents import triagem
+    monkeypatch.setattr(triagem, "TRACES_DIR", str(tmp_path_factory.mktemp("traces")))
+
+
 @pytest.fixture
 def mongo_seed():
     """Substitui o cliente Mongo do Analista por um mongomock populado."""

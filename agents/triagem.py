@@ -41,13 +41,32 @@ class Investigacao:
     relatorio: str = ""
     telemetria: Telemetria = field(default_factory=Telemetria)
     historico_estados: list[dict[str, Any]] = field(default_factory=list)
+    redelegacoes: int = 0
+    backlog_path: str | None = None
+    perguntas_humano: list[dict[str, str]] = field(default_factory=list)
+    encerrado_por_humano: bool = False
 
 
 # ---------- hooks dos sub-agentes (Fase 3 plugara MCP/LLM real) ----------
 
-async def _call_analista(inv: Investigacao) -> list[dict[str, Any]]:
+async def _call_analista(inv: Investigacao, perguntar=None) -> list[dict[str, Any]]:
     nome = _extrair_nome_cliente(inv.pergunta)
     cliente = analista.cliente_por_nome(nome) if nome else None
+    # Modo interativo: cliente nao identificado -> pergunta ao humano
+    if not cliente and perguntar is not None:
+        try:
+            nomes = [c["nome"] for c in analista._db().clientes.find({}, {"nome": 1})]
+        except Exception:
+            nomes = []
+        listagem = ", ".join(nomes) if nomes else "(sem clientes no Mongo)"
+        resposta = await perguntar(
+            f"Cliente nao identificado na pergunta '{inv.pergunta}'. "
+            f"Disponiveis: {listagem}. Qual cliente investigar?"
+        )
+        if resposta:
+            cliente = analista.cliente_por_nome(resposta.strip())
+            if cliente:
+                inv.perguntas_humano.append({"q": "cliente?", "r": resposta.strip()})
     if not cliente:
         return []
     inv.cliente = cliente
@@ -75,19 +94,24 @@ async def _call_observabilidade(inv: Investigacao) -> list[dict[str, Any]]:
     # Sem ticket nao tem o que correlacionar — pula MCP/LLM (economiza ~60s)
     if not inv.ticket:
         return []
-    if observabilidade.disponivel():
+    motivo_fallback: str
+    if not observabilidade.disponivel():
+        motivo_fallback = "MCP indisponivel (faltam GRAFANA_URL/GRAFANA_API_KEY ou OPENROUTER_API_KEY)"
+    else:
         timeout_s = float(os.getenv("SENTINEL_OBS_TIMEOUT_S", "60"))
         try:
             ev = await asyncio.wait_for(observabilidade.coletar(inv.pergunta), timeout=timeout_s)
             if ev:
                 return ev
+            motivo_fallback = "MCP respondeu vazio"
         except asyncio.TimeoutError:
-            pass  # cai no fallback deterministico
-    if not inv.ticket:
-        return []
+            motivo_fallback = f"MCP timeout apos {timeout_s:.0f}s"
+        except Exception as e:
+            motivo_fallback = f"MCP falhou: {type(e).__name__}"
     erros = analista.erros_do_ticket(inv.ticket)
     return [
-        {"tipo": "grafana", "ref": e["grafana_alert_id"], "nota": f"alerta ativo p/ {e['tipo']} (degradado)"}
+        {"tipo": "grafana", "ref": e["grafana_alert_id"],
+         "nota": f"alerta ativo p/ {e['tipo']} (degradado: {motivo_fallback})"}
         for e in erros
         if e.get("grafana_alert_id")
     ]
@@ -107,19 +131,25 @@ async def _call_tecnico(inv: Investigacao) -> list[dict[str, Any]]:
         f"Arquivo de log para ler com filesystem (path relativo ao root data/): {log_path}."
     )
     timeout_s = float(os.getenv("SENTINEL_TECNICO_TIMEOUT_S", "90"))
-    if tecnico_mod.disponivel():
+    motivo_fallback: str
+    if not tecnico_mod.disponivel():
+        motivo_fallback = "MCP indisponivel (faltam credenciais LLM)"
+    else:
         try:
             ev = await asyncio.wait_for(tecnico_mod.coletar(hipotese), timeout=timeout_s)
             if ev:
                 return ev
+            motivo_fallback = "MCP respondeu vazio"
         except asyncio.TimeoutError:
-            pass  # cai no fallback deterministico abaixo
+            motivo_fallback = f"MCP timeout apos {timeout_s:.0f}s"
+        except Exception as e:
+            motivo_fallback = f"MCP falhou: {type(e).__name__}"
     if inv.ticket and inv.ticket.get("deploy_suspeito"):
         return [
             {"tipo": "playwright", "ref": inv.cliente.get("nome", "?") if inv.cliente else "?",
-             "nota": "HTTP 500 confirmado visualmente (degradado)"},
+             "nota": f"HTTP 500 confirmado visualmente (degradado: {motivo_fallback})"},
             {"tipo": "filesystem", "ref": inv.ticket["deploy_suspeito"],
-             "nota": "commit altera src/auth/tenant.ts sem null-check (degradado)"},
+             "nota": f"commit altera src/auth/tenant.ts sem null-check (degradado: {motivo_fallback})"},
         ]
     return []
 
@@ -253,9 +283,78 @@ def _conclusao(inv: Investigacao) -> str:
     return "Investigacao inconclusiva — evidencias insuficientes para determinar causa raiz."
 
 
+# ---------- handoff p/ backlog_decomposer ----------
+
+async def _gerar_backlog(inv: Investigacao) -> str | None:
+    """Decompoe o fix do incidente em backlog. Falha aqui nao quebra a investigacao."""
+    try:
+        from agents import backlog_decomposer as bd
+
+        objetivo = f"corrigir incidente: {_conclusao(inv)[:200]}"
+        backlog = await bd.decompor(objetivo)
+        ref = inv.rca_id or (inv.ticket["_id"] if inv.ticket else "sem_ticket")
+        path = rca_writer.REPORTS_DIR / f"backlog_{ref}.md"
+        rca_writer.REPORTS_DIR.mkdir(exist_ok=True)
+        path.write_text(backlog.render(), encoding="utf-8")
+        return str(path)
+    except Exception:
+        return None
+
+
+# ---------- persistencia de trace ----------
+
+TRACES_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "traces")
+
+
+def _persistir_trace(inv: Investigacao, veredito: critic.Veredito) -> None:
+    """Grava trace_<ticket_id>.json para analise posterior pelo trace_analyzer."""
+    import json
+    from datetime import datetime, timezone
+
+    ticket_id = inv.ticket.get("_id") if inv.ticket else "sem_ticket"
+    os.makedirs(TRACES_DIR, exist_ok=True)
+    trace = {
+        "ticket_id": str(ticket_id),
+        "rca_id": str(inv.rca_id) if inv.rca_id else None,
+        "pergunta": inv.pergunta,
+        "cliente": inv.cliente.get("nome") if inv.cliente else None,
+        "confianca": inv.confianca,
+        "iteracao": inv.iteracao,
+        "redelegacoes": inv.redelegacoes,
+        "veredito_aprovado": veredito.aprovado,
+        "veredito_motivos": veredito.motivos,
+        "evidencias": [
+            {"tipo": e.get("tipo"), "ref": str(e.get("ref")), "degradado": "degradado" in (e.get("nota") or "").lower()}
+            for e in inv.evidencias
+        ],
+        "historico_estados": inv.historico_estados,
+        "backlog_path": inv.backlog_path,
+        "perguntas_humano": inv.perguntas_humano,
+        "encerrado_por_humano": inv.encerrado_por_humano,
+        "gerado_em": datetime.now(timezone.utc).isoformat(),
+    }
+    path = os.path.join(TRACES_DIR, f"trace_{ticket_id}.json")
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(trace, f, ensure_ascii=False, indent=2)
+
+
 # ---------- state machine ----------
 
-async def run(pergunta: str, inv: Investigacao | None = None) -> Investigacao:
+async def run(
+    pergunta: str,
+    inv: Investigacao | None = None,
+    *,
+    perguntar=None,
+    confirmar=None,
+) -> Investigacao:
+    """Roda a investigacao.
+
+    Args:
+        pergunta: sintoma + cliente em texto livre.
+        inv: estado inicial (para retomar). Default: novo.
+        perguntar: async callable(str)->str para perguntas abertas (modo interactive).
+        confirmar: async callable(str)->bool para acoes sensiveis. None = autoriza tudo.
+    """
     if inv is None:
         inv = Investigacao(pergunta=pergunta)
     limits = safeguards.Limits()
@@ -283,7 +382,9 @@ async def run(pergunta: str, inv: Investigacao | None = None) -> Investigacao:
 
         elif inv.estado == State.COLETANDO:
             # delegacao paralela — Analista + Observabilidade
-            ev_a, ev_o = await asyncio.gather(_call_analista(inv), _call_observabilidade(inv))
+            ev_a, ev_o = await asyncio.gather(
+                _call_analista(inv, perguntar=perguntar), _call_observabilidade(inv)
+            )
             inv.evidencias.extend(ev_a + ev_o)
             inv.confianca = _confianca(inv.evidencias)
             # Tecnico SEMPRE roda quando ha um ticket — confirmacao ativa
@@ -304,16 +405,43 @@ async def run(pergunta: str, inv: Investigacao | None = None) -> Investigacao:
                 _conclusao(inv), inv.evidencias, telemetria=inv.telemetria
             )
             inv._veredito = veredito  # type: ignore[attr-defined]
-            inv.estado = State.PUBLICANDO
+            # Re-delegação: confiança < 0.8 e ainda há orçamento → re-roda Técnico
+            # (confirmação ativa é onde mora a evidência externa). Limite: 1 retry.
+            pode_redelegar = (
+                inv.confianca < 0.8
+                and inv.redelegacoes < 1
+                and inv.ticket is not None
+                and inv.iteracao + 3 <= limits.max_iterations
+            )
+            if pode_redelegar:
+                inv.redelegacoes += 1
+                inv.estado = State.CONFIRMANDO
+            else:
+                inv.estado = State.PUBLICANDO
 
         elif inv.estado == State.PUBLICANDO:
             veredito = inv._veredito  # type: ignore[attr-defined]
             inv.relatorio = output_guard.sanitize(_montar_relatorio(inv, veredito))
-            if inv.ticket and veredito.aprovado:
+            # Mongo (irreversivel) so com aprovacao + confirmacao humana opcional
+            pode_gravar = inv.ticket and veredito.aprovado
+            if pode_gravar and confirmar is not None:
+                autorizado = await confirmar(
+                    f"Publicar RCA para {inv.cliente['nome'] if inv.cliente else '?'} "
+                    f"(confianca {inv.confianca:.0%})? Acao irreversivel: fecha ticket no Mongo."
+                )
+                if not autorizado:
+                    inv.encerrado_por_humano = True
+                    pode_gravar = False
+            if pode_gravar:
                 inv.rca_id = analista.registrar_rca(
                     inv.ticket["_id"], _conclusao(inv), inv.evidencias
                 )
-                rca_writer.salvar(inv.relatorio, inv.rca_id)
+            if inv.ticket:
+                rca_writer.salvar(inv.relatorio, inv.rca_id or inv.ticket["_id"])
+            # Backlog do fix — so quando RCA foi aprovado E autorizado (humano nao negou)
+            if pode_gravar and os.getenv("SENTINEL_GERAR_BACKLOG", "1") != "0":
+                inv.backlog_path = await _gerar_backlog(inv)
+            _persistir_trace(inv, veredito)
             inv.estado = State.DONE
 
     _snapshot(State.DONE)
@@ -323,8 +451,10 @@ async def run(pergunta: str, inv: Investigacao | None = None) -> Investigacao:
 if __name__ == "__main__":
     import sys
 
-    args = [a for a in sys.argv[1:] if a != "--no-reset"]
+    flags = {"--no-reset", "--interactive", "-i"}
+    args = [a for a in sys.argv[1:] if a not in flags]
     no_reset = "--no-reset" in sys.argv[1:]
+    interativo = "--interactive" in sys.argv[1:] or "-i" in sys.argv[1:]
     pergunta = " ".join(args) or "Por que o sistema da Acme esta caindo?"
     if not no_reset:
         try:
@@ -339,7 +469,19 @@ if __name__ == "__main__":
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     except Exception:
         pass
-    resultado = asyncio.run(run(pergunta))
+    if interativo:
+        async def _perguntar(q: str) -> str:
+            print(f"\n[pergunta] {q}")
+            return input("> ").strip()
+
+        async def _confirmar(q: str) -> bool:
+            print(f"\n[confirmar] {q}")
+            return input("s/n > ").strip().lower().startswith("s")
+
+        resultado = asyncio.run(run(pergunta, perguntar=_perguntar, confirmar=_confirmar))
+    else:
+        resultado = asyncio.run(run(pergunta))
     print(resultado.relatorio)
     print("\n---")
-    print(f"rca_id={resultado.rca_id} confianca={resultado.confianca:.0%} iter={resultado.iteracao}")
+    encerrado = " (encerrado por humano)" if resultado.encerrado_por_humano else ""
+    print(f"rca_id={resultado.rca_id} confianca={resultado.confianca:.0%} iter={resultado.iteracao}{encerrado}")

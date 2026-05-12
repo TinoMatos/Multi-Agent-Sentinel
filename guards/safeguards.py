@@ -7,9 +7,8 @@ from dataclasses import dataclass
 
 @dataclass
 class Limits:
-    max_iterations: int = int(os.getenv("SENTINEL_MAX_ITERATIONS", "5"))
+    max_iterations: int = int(os.getenv("SENTINEL_MAX_ITERATIONS", "8"))
     token_budget: int = int(os.getenv("SENTINEL_TOKEN_BUDGET", "50000"))
-    agent_timeout_s: int = int(os.getenv("SENTINEL_AGENT_TIMEOUT_S", "30"))
 
 
 class BudgetExceeded(RuntimeError):

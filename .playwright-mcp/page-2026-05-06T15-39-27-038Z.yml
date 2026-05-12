@@ -1,1 +1,0 @@
-- generic [ref=e2]: "{ \"error\": { \"message\": \"Unrecognized request URL (GET: /). If you are trying to list objects, remove the trailing slash. If you are trying to retrieve an object, make sure you passed a valid (non-empty) identifier in your code. Please see https://stripe.com/docs or we can help at https://support.stripe.com/.\", \"type\": \"invalid_request_error\" } }"

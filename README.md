@@ -1,50 +1,67 @@
 # Multi-Agent Technical Sentinel
 
-Sistema multiagente que **investiga incidentes técnicos** correlacionando MongoDB + Grafana + Filesystem + Playwright + GitHub e gera um RCA em markdown. Não é chatbot Q&A — você dá um sintoma com cliente (ex: *"Acme está fora do ar"*) e ele devolve causa + evidências.
+Sistema multiagente que **investiga incidentes técnicos** correlacionando MongoDB + Grafana + Filesystem + Playwright + GitHub e devolve um **RCA com evidências**. Você dá o sintoma (*"Acme está fora do ar"*) — ele entrega causa, prova e backlog do fix.
 
-**Stack:** Python 3.11+, LangChain + LangGraph, MCPs via `langchain-mcp-adapters`, MongoDB, Streamlit, OpenRouter (LLM).
+**Stack:** Python 3.11+ · LangChain/LangGraph · MCPs via `langchain-mcp-adapters` · MongoDB · Streamlit · OpenRouter. Arquitetura **contract-driven**: cada agente é especificado em Markdown e validado contra o código.
 
 ---
 
 ## Pipeline
 
 ```text
-Triagem → [Analista (Mongo) ‖ Observabilidade (Grafana)] → Técnico (Filesystem + Playwright + GitHub) → Critic → RCA
+Triagem → [Analista (Mongo) ‖ Observabilidade (Grafana)] → Técnico (FS+Playwright+GitHub) → Critic → RCA → Backlog
+              ↑                                              │
+              └────── re-delega se confiança < 80% ──────────┘
 ```
 
-State machine com loop: confiança ≥80% confirma; <80% re-delega; max 5 iterações. Critic valida antes de publicar (anti-alucinação).
+State machine, `max_iterations=8`, 1 retry. Critic veta antes de publicar (anti-alucinação). Após RCA aprovado, **Backlog Decomposer** quebra o fix em épicos+stories.
 
 ---
 
-## Instalação
-
-### Pré-requisitos
-
-- **Python** 3.11+
-- **Node.js** 18+ (MCPs rodam via `npx`)
-- **MongoDB** rodando em `localhost:27017` ([Community Server](https://www.mongodb.com/try/download/community) ou `docker run -d -p 27017:27017 mongo`)
-- **mongosh** (pra rodar o seed)
-- **Chave OpenRouter com crédito** — modelos `:free` **não funcionam** com tool-calling de MCPs grandes (filesystem + playwright expõem ~15 tools combinadas). Eles travam o stream HTTP do OpenRouter. Use modelos pagos da Anthropic — testado e funciona com `claude-sonnet-4.6` (main) + `claude-haiku-4.5` (fast). Custa ~$0.01–0.05 por RCA. Sem crédito: roda em modo degradado determinístico.
-
-### Setup (uma vez)
+## Quick start
 
 ```bash
-git clone https://github.com/TinoMatos/Multi-Agent-Sentinel.git && cd Multi-Agent-Sentinel
 pip install -r requirements.txt
-cp .env.example .env       # edite e ponha OPENROUTER_API_KEY=sk-or-v1-...
+docker run -d -p 27017:27017 mongo                              # ou MongoDB local
 mongosh "mongodb://localhost:27017/sentinel" data/seed_mongo.js
-npx -y playwright install chromium
+cp .env.example .env                                            # cole OPENROUTER_API_KEY=sk-or-v1-...
+python -m streamlit run app.py                                  # UI em http://localhost:8501
 ```
 
-### Rodar
+**Modelos:** `:free` do OpenRouter **não funciona** com MCPs grandes — usa Anthropic pago (`claude-sonnet-4.5` + `claude-haiku-4.5`, ~$0.01–0.05 por RCA). Sem chave: roda em modo degradado determinístico.
+
+---
+
+## Agentes
+
+| Agente | Tipo | Função |
+| --- | --- | --- |
+| Triagem | task_based / interactive | orquestrador, state machine |
+| Analista | task_based | Mongo (cliente, tickets, erros, RCAs históricos) |
+| Observabilidade | task_based | Grafana MCP (alertas, métricas) |
+| Técnico | task_based | filesystem + playwright + github MCPs |
+| Critic | task_based | heurísticas + sanity LLM, veta RCAs alucinados |
+| RCA Writer | task_based | renderiza markdown |
+| Trace Analyzer | task_based | KPIs de `data/traces/*.json` |
+| Backlog Decomposer | goal_oriented | decompõe fix em épicos+stories+riscos |
+
+Cada um tem 5 contratos `.md` em [contracts/](contracts/). Rode `python -m contracts.validar` pra cruzar contrato com código.
+
+---
+
+## Comandos
 
 ```bash
-python -m streamlit run app.py     # UI em http://localhost:8501 (recomendado)
-python -m agents.triagem "Por que o sistema da Acme esta caindo?"   # CLI
-python -m pytest -v                # testes (rodam sem API key)
+python -m streamlit run app.py                            # UI (recomendado — carrega .env)
+python -m agents.triagem "Por que a Acme esta caindo?"    # CLI
+python -m agents.triagem "algo estranho" -i               # interativo: agente pergunta cliente + confirma antes de publicar
+python -m agents.backlog_decomposer "objetivo aqui"       # decompor objetivo standalone
+python -m agents.trace_analyzer                           # KPIs de todas as execuções
+python -m contracts.validar                               # valida contratos vs. código
+python -m pytest -q                                       # 51 testes (rodam sem API key)
 ```
 
-> Streamlit não acha `streamlit.exe` no Windows? Use `python -m streamlit`. CLI não carrega `.env` automaticamente — exporte as variáveis antes ou use a UI.
+CLI não carrega `.env` — exporte as vars ou use Streamlit. Re-rode o seed entre runs (Sentinel fecha o ticket); a CLI já faz auto-reset.
 
 ---
 
@@ -52,85 +69,77 @@ python -m pytest -v                # testes (rodam sem API key)
 
 | Cliente | Sintoma | Causa esperada |
 | --- | --- | --- |
-| Acme Corp | Site fora do ar | Deploy ruim — null pointer em `resolveTenant` |
-| Beta SaaS | Painel lento (>10s) | Query Mongo sem índice |
-| Gama Logística | Pagamentos falhando | Stripe API timeout (dependência externa) |
-| Delta Health | Pods reiniciando ~3 dias | Memory leak (heap cresce ~50MB/h) |
-| Echo Fintech | Alerta noturno | Falso positivo (rolling restart) — Critic deve vetar |
-| Foxtrot Marketplace | Busca/recomendação intermitente | Rate-limit em cascata entre serviços internos |
-| Golf Bank | Workers de conciliação parados | Rotação de secret quebrou auth (mudança fora do código) |
-| Hotel Streaming | Erro no novo player | Feature flag rampada para 100% (rollout sem deploy) |
+| Acme | Site fora do ar | Deploy ruim — null pointer em `resolveTenant` |
+| Beta | Painel lento >10s | Query Mongo sem índice |
+| Gama | Pagamentos falhando | Stripe API timeout |
+| Delta | Pods reiniciando ~3d | Memory leak (~50MB/h) |
+| Echo | Alerta noturno | Falso positivo — Critic deve vetar |
+| Foxtrot | Busca intermitente | Rate-limit em cascata |
+| Golf | Workers parados | Rotação de secret quebrou auth |
+| Hotel | Erro no novo player | Feature flag rampada a 100% |
 
-A UI tem botão **Auto-demo (8 cenários)** que roda todos em sequência e mostra um placar com 🟢/🟡/🔴 + 🚫 (vetado pelo Critic). Cada item expande pra ver evidências e RCA.
-
-Re-rode o seed após cada investigação — o Sentinel fecha o ticket no Mongo:
-
-```bash
-mongosh "mongodb://localhost:27017/sentinel" data/seed_mongo.js
-```
+Botão **Auto-demo** na UI roda os 8 em sequência.
 
 ---
 
-## Variáveis de ambiente
+## Diferenciais
 
-| Variável | Default / Efeito se ausente |
+**Anti-alucinação (Critic veta se):** <2 evidências · conclusão cita "deploy" sem `tipo=commit` · cita métrica sem `tipo=grafana` · >50% das evidências em fallback `(degradado)` · contradições no sanity LLM. Quando vetado: markdown salvo com ressalvas, Mongo intacto.
+
+**Modo interativo (`-i`):** cliente não identificado → pergunta qual; antes de `registrar_rca` → pede `s/n`. Programático: `run(pergunta, perguntar=..., confirmar=...)`.
+
+**Contract-driven:** edita `.md` → roda `validar` → ajusta código. Cruza `max_etapas` em `rules.md` com `SENTINEL_MAX_ITERATIONS`, `acoes_sensiveis` com `def`s reais, etc. Divergência é factual, não opinião.
+
+**Trace + analyzer:** cada investigação grava `data/traces/trace_<id>.json` (estados, evidências, confiança, redelegações, motivos de veto). `trace_analyzer` agrega: % aprovação, evidências degradadas, motivos de veto mais comuns.
+
+**Handoff produto:** RCA aprovado → `backlog_decomposer` decompõe o fix em `reports/backlog_<id>.md`. Falha do backlog não derruba a investigação.
+
+---
+
+## Variáveis
+
+| Var | Default / Efeito |
 | --- | --- |
-| `OPENROUTER_API_KEY` | **Obrigatória** pra LLM. Sem ela: modo degradado determinístico. |
+| `OPENROUTER_API_KEY` | **Obrigatória**. Sem ela: degradado. |
+| `SENTINEL_MODEL` / `_FAST` | `claude-sonnet-4.5` / `claude-haiku-4.5`. `:free` quebra com MCPs. |
 | `MONGO_URI` | `mongodb://localhost:27017/sentinel` |
-| `SENTINEL_MODEL` | Default: `anthropic/claude-sonnet-4.6` (Triagem + Técnico — precisa raciocinar com MCPs). Modelos `:free` **não funcionam** aqui. |
-| `SENTINEL_MODEL_FAST` | Default: `anthropic/claude-haiku-4.5` (Critic + Observabilidade — barato, roda em todo RCA). |
-| `SENTINEL_OBS_TIMEOUT_S` | Default: `60`. Timeout do Observabilidade (Grafana MCP). |
-| `SENTINEL_TECNICO_TIMEOUT_S` | Default: `90`. Timeout do Técnico (filesystem+playwright+github MCPs). |
-| `GRAFANA_URL` + `GRAFANA_API_KEY` | Sem ambas: confiança capada em 70%. |
-| `GITHUB_PERSONAL_ACCESS_TOKEN` | PAT clássico, escopo `public_repo` ou `repo` (read). Sem ele: GitHub MCP em modo degradado. |
-| `SENTINEL_USE_GITHUB` | `0` (default) — GitHub MCP fica fora do pipeline. Ative com `1` para usar. |
-| `SENTINEL_GITHUB_REPO` | Repo onde o agente fará `search_code` (ex: `tinobelmont/multi-agent-sentinel`). Só é usado quando `SENTINEL_USE_GITHUB=1`. |
+| `GRAFANA_URL` + `_API_KEY` | Sem ambas: confiança capada em 70%. |
+| `GITHUB_PERSONAL_ACCESS_TOKEN` + `SENTINEL_USE_GITHUB=1` + `SENTINEL_GITHUB_REPO` | Ativa GitHub MCP (read-only, só `search_code`). |
+| `SENTINEL_MAX_ITERATIONS` | `8` (caminho natural 5 + 3 pro retry) |
+| `SENTINEL_OBS_TIMEOUT_S` / `_TECNICO_TIMEOUT_S` | `60` / `90` |
+| `SENTINEL_GERAR_BACKLOG` | `1` (decompõe fix após RCA aprovado). `0` desliga. |
 
-### Ativando o GitHub MCP
-
-Os SHAs do seed são fictícios — não existem em nenhum repositório real. Por isso o agente é instruído a usar **apenas `search_code`**, nunca `get_commit`/`get_pull_request` em SHAs do stacktrace. Pra ativar:
-
-1. Suba este projeto no seu GitHub.
-2. Gere um PAT em [github.com/settings/tokens](https://github.com/settings/tokens) com escopo `public_repo` (ou `repo` se for privado). **Não marque nenhum escopo de escrita.**
-3. No `.env`:
-
-   ```bash
-   GITHUB_PERSONAL_ACCESS_TOKEN=ghp_...
-   SENTINEL_USE_GITHUB=1
-   SENTINEL_GITHUB_REPO=seu-user/multi-agent-sentinel
-   ```
-
-4. Reinicie o Streamlit. O agente passa a buscar nomes de função/arquivo dos stacktraces (`resolveTenant`, `OAuthClient`, etc.) no seu repo e devolve trechos reais como evidência tipo `github` 🐙.
+Lista completa: [.env.example](.env.example).
 
 ---
 
 ## Estrutura
 
 ```text
-agents/         # triagem (orchestrator), analista, tecnico, observabilidade, critic, rca_writer
-mcp/config.json # registro dos 5 MCPs (filesystem, mongodb, grafana, playwright, github)
-guards/         # output_guard (PII/segredos) + safeguards (max_iterations, token budget)
-data/seed_mongo.js  # 8 clientes, 9 tickets, 9 erros, 2 RCAs históricos
-data/logs/      # logs por cliente (acme.log, beta.log, ...) — Filesystem MCP cita estes
-config/llm.json # modelos LLM (override via SENTINEL_MODEL*)
-app.py          # UI Streamlit
-tests/          # pytest, ~30 casos, modo degradado
-reports/        # RCAs gerados (.md por ticket)
+agents/         8 agentes + helpers (_llm, _sdk_bridge, _telemetria, seed_helper)
+contracts/     8 × 5 specs + validar.py + analise-agente.md
+guards/        output_guard (PII) + safeguards (max_iter, token budget)
+mcp/config.json   5 MCPs (filesystem, mongodb, grafana, playwright, github)
+config/        llm.json + precos.json + diagnosticos.json
+data/          seed_mongo.js + logs/ + traces/
+app.py         UI Streamlit
+tests/         51 casos pytest
+reports/       RCAs + backlogs gerados
 ```
 
 ---
 
 ## Troubleshooting
 
-| Sintoma | Correção |
+| Sintoma | Causa / fix |
 | --- | --- |
-| `pymongo.ServerSelectionTimeoutError` | MongoDB não está rodando. |
-| Confiança 15%, *"cliente não encontrado"* | Ticket já foi fechado — re-rode o seed. |
-| `streamlit: command not found` | Use `python -m streamlit run app.py`. |
-| `MCP grafana indisponivel: FileNotFoundError` | OK ignorar — cai em modo degradado. |
-| Tudo em 3s + evidências `(degradado)` | `.env` não carregou ou falta `OPENROUTER_API_KEY`. |
-| Critic e RCA OK, mas Técnico/Obs ainda `(degradado)` | Você está usando modelos `:free`. O streaming HTTP do OpenRouter trava nesses modelos quando o react agent recebe ~15 tools. Adicione crédito e use os defaults pagos (`claude-sonnet-4.6` + `claude-haiku-4.5`). |
-| `httpcore CancelledError` / `TimeoutError` no log | Mesma causa: modelo `:free` engasgou no tool-calling. Troque pra modelo pago. |
-| Auto-demo travando em "VALIDANDO" por minutos | GitHub MCP buscando commits fake na API real. Mantenha `SENTINEL_USE_GITHUB=0` quando rodar com o seed. |
-| Sidebar mostra `GitHub MCP — sem token` | Cole o PAT em `GITHUB_PERSONAL_ACCESS_TOKEN` no `.env` e reinicie o Streamlit. |
-| Sidebar mostra `GitHub MCP — desativado` | Token configurado mas `SENTINEL_USE_GITHUB=0`. Ative com `1` se apontar pra repo real. |
+| `ModuleNotFoundError: agents` | `cd` pra raiz do projeto antes de rodar |
+| `pymongo.ServerSelectionTimeoutError` | MongoDB não está rodando |
+| `streamlit: command not found` | Use `python -m streamlit` |
+| `localhost:8501` recusa | Streamlit não subiu/terminal fechou. Rode de novo, aguarde ~5s |
+| Confiança 15% + "cliente não encontrado" | Ticket já fechado — re-rode o seed |
+| Tudo em 3s + evidências `(degradado: ...)` | `.env` não carregou ou falta `OPENROUTER_API_KEY` |
+| Critic veta com "maioria degradado" | Esperado em CLI/testes sem MCPs reais. Use Streamlit |
+| Técnico/Obs `(degradado)` mas Critic OK | Modelo `:free` engasga no tool-calling. Use pago |
+| Auto-demo trava em VALIDANDO | GitHub MCP buscando SHAs fake. Mantenha `SENTINEL_USE_GITHUB=0` com o seed |
+| Sem `backlog_<id>.md` | Critic vetou OU `SENTINEL_GERAR_BACKLOG=0` |

@@ -56,6 +56,30 @@ async def test_sanity_llm_smoke(monkeypatch):
     assert veredito.confianca >= 0.0
 
 
+def test_reprova_quando_maioria_e_degradada():
+    ev = [
+        {"tipo": "mongo", "ref": "1", "nota": "ticket aberto"},
+        {"tipo": "commit", "ref": "abc", "nota": "deploy suspeito"},
+        {"tipo": "playwright", "ref": "url", "nota": "HTTP 500 (degradado)"},
+        {"tipo": "filesystem", "ref": "x", "nota": "altera tenant.ts (degradado)"},
+        {"tipo": "grafana", "ref": "alert", "nota": "alerta ativo (degradado)"},
+    ]
+    v = avaliar("Deploy abc derrubou o servico", ev)
+    assert not v.aprovado
+    assert any("degradado" in m for m in v.motivos)
+
+
+def test_aprova_quando_minoria_e_degradada():
+    ev = [
+        {"tipo": "mongo", "ref": "1", "nota": "ticket aberto"},
+        {"tipo": "commit", "ref": "abc", "nota": "deploy"},
+        {"tipo": "grafana", "ref": "alert", "nota": "spike CPU real"},
+        {"tipo": "playwright", "ref": "url", "nota": "HTTP 500 (degradado)"},
+    ]
+    v = avaliar("Deploy abc causou spike de CPU", ev)
+    assert v.aprovado
+
+
 def test_reprova_com_poucas_evidencias():
     v = avaliar("Conclusao qualquer", [{"tipo": "mongo", "ref": "x", "nota": "y"}])
     assert not v.aprovado

@@ -7,3 +7,7 @@ venv/
 reports/*.md
 !reports/.gitkeep
 node_modules/
+.playwright-mcp/
+streamlit.log
+[TimeoutError:
+data/traces/*.json
