@@ -412,6 +412,7 @@ with st.sidebar:
     st.divider()
     st.markdown("##### Cenários do seed")
     cenarios = {
+        "✏️ Custom (sua pergunta)": None,
         "Acme Corp — Indisponibilidade no login": "Por que o sistema da Acme esta caindo?",
         "Beta SaaS — Degradação no painel admin": "Por que o painel administrativo da Beta SaaS esta lento?",
         "Gama Logística — Falha no checkout": "Por que os pagamentos da Gama Logistica estao falhando?",
@@ -420,7 +421,6 @@ with st.sidebar:
         "Foxtrot Marketplace — Falhas em cascata na busca": "Por que a busca e as recomendacoes do marketplace Foxtrot estao falhando intermitentemente?",
         "Golf Bank — Workers de conciliação parados": "Por que os workers de conciliacao do Golf Bank pararam de processar desde a madrugada?",
         "Hotel Streaming — Erro no novo player": "Por que o novo player da Hotel Streaming esta dando erro para usuarios desde a manha?",
-        "✏️ Custom...": None,
     }
     label = st.radio(
         "Selecione um caso:",
@@ -445,12 +445,35 @@ with st.sidebar:
         if cenario is None
         else cenario
     )
+    # --- Clarificação inline: se pergunta custom não identifica cliente, perguntar aqui mesmo ---
+    if cenario is None and pergunta:
+        from agents.triagem import _extrair_nome_cliente as _ext
+        if not _ext(pergunta):
+            from agents import analista as _an
+            try:
+                _nomes = [c["nome"] for c in _an._db().clientes.find({}, {"nome": 1})]
+            except Exception:
+                _nomes = []
+            if _nomes:
+                st.caption("🤝 Cliente não identificado — selecione:")
+                _sel = st.selectbox(
+                    "Cliente:",
+                    options=[None] + _nomes,
+                    index=0,
+                    format_func=lambda x: "— escolha um cliente —" if x is None else x,
+                    key="sidebar_cliente_sel",
+                    label_visibility="collapsed",
+                )
+                if _sel:
+                    pergunta = f"{pergunta} (cliente: {_sel})"
     auto_reset = st.checkbox(
         "🔄 Auto-reset (reabre ticket antes)",
         value=True,
         help="Reabre tickets fechados por investigações anteriores. Sem isso você vê 'cliente sem tickets' depois da 1ª rodada.",
     )
     st.session_state["auto_reset_flag"] = auto_reset
+    # Modo interativo sempre ligado — agente pergunta cliente e avisa quando pergunta nao bate com ticket
+    st.session_state["modo_interativo"] = True
     rodar = st.button("▶️  INVESTIGAR", type="primary", use_container_width=True)
     auto_demo = st.button("🚀  AUTO-DEMO (8 cenários)", use_container_width=True)
 
@@ -599,6 +622,9 @@ def render_banner(inv):
     causa = extrair_causa(inv)
     c = inv.confianca or 0.0
     with banner_container.container():
+        # Aviso de desalinhamento (pergunta nao bate com ticket encontrado)
+        if getattr(inv, "motivo_desalinhamento", None):
+            st.warning(f"🔀 **Alinhamento baixo** ({inv.alinhamento:.0%}): {inv.motivo_desalinhamento}")
         if causa and c >= 0.7:
             st.markdown(
                 f"""
@@ -709,6 +735,7 @@ def render_replay(inv):
 def _executar(pergunta_q: str, mostrar_pills: bool = True):
     from agents.triagem import Investigacao
 
+    # Clarificação de cliente eh feita na sidebar (antes do INVESTIGAR) — aqui so executa.
     if st.session_state.get("auto_reset_flag", True):
         try:
             from agents.seed_helper import reset_tickets
@@ -868,12 +895,11 @@ if auto_demo:
     media_t = sum(r["tempo"] for r in resultados) / max(len(resultados), 1)
     st.success(f"🎯 Média: confiança {media_conf:.0%} · tempo {media_t:.1f}s por cenário")
 
-elif (rodar and pergunta) or pergunta_pendente:
+if not auto_demo and ((rodar and pergunta) or pergunta_pendente):
     pergunta_q = pergunta_pendente or pergunta
     inv, elapsed = _executar(pergunta_q)
     _render_resultado(inv, elapsed)
-
-else:
+elif not auto_demo:
     with status_container.container():
         st.markdown(render_pills(""), unsafe_allow_html=True)
     st.info("👈 Selecione um cenário e clique em **Investigar** — ou rode o **Auto-demo** pra ver os 8 casos em sequência.")

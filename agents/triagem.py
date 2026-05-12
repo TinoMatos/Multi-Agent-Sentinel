@@ -45,6 +45,8 @@ class Investigacao:
     backlog_path: str | None = None
     perguntas_humano: list[dict[str, str]] = field(default_factory=list)
     encerrado_por_humano: bool = False
+    alinhamento: float = 1.0          # 0.0-1.0, similaridade pergunta vs ticket encontrado
+    motivo_desalinhamento: str | None = None
 
 
 # ---------- hooks dos sub-agentes (Fase 3 plugara MCP/LLM real) ----------
@@ -52,6 +54,7 @@ class Investigacao:
 async def _call_analista(inv: Investigacao, perguntar=None) -> list[dict[str, Any]]:
     nome = _extrair_nome_cliente(inv.pergunta)
     cliente = analista.cliente_por_nome(nome) if nome else None
+    cliente_escolhido_pelo_humano = False
     # Modo interativo: cliente nao identificado -> pergunta ao humano
     if not cliente and perguntar is not None:
         try:
@@ -67,6 +70,7 @@ async def _call_analista(inv: Investigacao, perguntar=None) -> list[dict[str, An
             cliente = analista.cliente_por_nome(resposta.strip())
             if cliente:
                 inv.perguntas_humano.append({"q": "cliente?", "r": resposta.strip()})
+                cliente_escolhido_pelo_humano = True
     if not cliente:
         return []
     inv.cliente = cliente
@@ -75,6 +79,38 @@ async def _call_analista(inv: Investigacao, perguntar=None) -> list[dict[str, An
         return [{"tipo": "mongo", "ref": str(cliente["_id"]), "nota": "cliente sem tickets abertos"}]
     inv.ticket = abertos[0]
     erros = analista.erros_do_ticket(inv.ticket)
+    # alinhamento: a pergunta do operador bate com o ticket aberto?
+    inv.alinhamento = _alinhamento_pergunta_ticket(inv.pergunta, inv.ticket, erros)
+    if inv.alinhamento < 0.3:
+        inv.motivo_desalinhamento = (
+            f"Pergunta '{inv.pergunta[:80]}' nao parece corresponder ao ticket "
+            f"aberto '{inv.ticket.get('descricao', '?')[:80]}'."
+        )
+        # interativo: pergunta se quer continuar mesmo assim — mas nao quando o
+        # humano acabou de escolher o cliente (ele ja sabe que escolheu)
+        if perguntar is not None and not cliente_escolhido_pelo_humano:
+            r = await perguntar(
+                f"{inv.motivo_desalinhamento} Continuar investigando esse ticket? "
+                f"(sim para seguir / digite outro cliente para trocar / vazio para abortar)"
+            )
+            if not r or r.strip().lower() in ("nao", "n", "no"):
+                inv.cliente = None
+                inv.ticket = None
+                return []
+            if r.strip().lower() not in ("sim", "s", "yes"):
+                # usuario digitou outro nome de cliente
+                novo = analista.cliente_por_nome(r.strip())
+                if novo:
+                    inv.cliente = novo
+                    abertos = analista.tickets_abertos_do_cliente(novo["_id"])
+                    if abertos:
+                        inv.ticket = abertos[0]
+                        erros = analista.erros_do_ticket(inv.ticket)
+                        inv.alinhamento = _alinhamento_pergunta_ticket(inv.pergunta, inv.ticket, erros)
+                        inv.motivo_desalinhamento = None if inv.alinhamento >= 0.3 else inv.motivo_desalinhamento
+                    inv.perguntas_humano.append({"q": "trocar cliente?", "r": r.strip()})
+            else:
+                inv.perguntas_humano.append({"q": "alinhamento baixo?", "r": "continuar"})
     ev: list[dict[str, Any]] = [
         {"tipo": "mongo", "ref": str(inv.ticket["_id"]), "nota": inv.ticket["descricao"]}
     ]
@@ -152,6 +188,44 @@ async def _call_tecnico(inv: Investigacao) -> list[dict[str, Any]]:
              "nota": f"commit altera src/auth/tenant.ts sem null-check (degradado: {motivo_fallback})"},
         ]
     return []
+
+
+# ---------- alinhamento pergunta vs ticket ----------
+
+_STOPWORDS_PT = {
+    "porque", "para", "pelo", "pela", "pelos", "pelas", "esta", "esse", "essa", "isso",
+    "isto", "esses", "essas", "este", "estes", "estou", "como", "quando", "onde",
+    "quem", "qual", "quais", "tem", "estamos", "estao", "esta", "fora", "sob",
+    "com", "sem", "mais", "menos", "muito", "pouco", "agora", "hoje", "depois",
+    "antes", "tambem", "ainda", "sempre", "nunca", "talvez", "sera", "vai",
+    "cliente", "sistema", "agente", "investigar", "fazer", "saber", "preciso",
+    "ajuda", "ajude", "favor", "obrigado",
+}
+
+
+def _tokenizar(texto: str) -> set[str]:
+    tokens = re.split(r"\W+", (texto or "").lower())
+    return {t for t in tokens if len(t) >= 4 and t not in _STOPWORDS_PT}
+
+
+def _alinhamento_pergunta_ticket(pergunta: str, ticket: dict, erros: list[dict]) -> float:
+    """Score 0.0-1.0 medindo se a pergunta corresponde ao ticket encontrado.
+
+    Compara palavras-chave (>=4 chars, sem stopwords) entre pergunta e
+    descricao do ticket + tipos/stacktraces dos erros. Score = interseccao /
+    tamanho da pergunta. 1.0 quando todas as palavras-chave da pergunta
+    aparecem no contexto do ticket.
+    """
+    p = _tokenizar(pergunta)
+    if not p:
+        return 1.0  # pergunta sem palavras significativas — nao da pra julgar
+    contexto = ticket.get("descricao", "")
+    for e in erros:
+        contexto += " " + (e.get("tipo") or "") + " " + (e.get("stacktrace") or "")
+    t = _tokenizar(contexto)
+    if not t:
+        return 0.5  # sem contexto rico — neutro
+    return len(p & t) / len(p)
 
 
 # ---------- helpers ----------
@@ -252,9 +326,18 @@ def _conclusao(inv: Investigacao) -> str:
     if not inv.ticket:
         return "Cliente nao encontrado ou sem tickets abertos."
 
+    # Prefixo de desalinhamento — torna a resposta tailored a quem fez a pergunta
+    prefixo = ""
+    if inv.alinhamento < 0.3 and inv.motivo_desalinhamento:
+        prefixo = (
+            f"⚠ Aviso de alinhamento: sua pergunta menciona termos que nao aparecem no "
+            f"ticket encontrado. Pode ser sobre outro modulo/incidente — o que segue eh "
+            f"a analise do unico ticket aberto desse cliente.\n\n"
+        )
+
     deploy = inv.ticket.get("deploy_suspeito")
     if deploy:
-        return (
+        return prefixo + (
             f"Incidente correlacionado ao deploy `{deploy}`. Recomenda-se rollback imediato "
             f"e abertura de hotfix. RCA historico similar encontrado — sugere regressao do mesmo bug."
         )
@@ -270,17 +353,49 @@ def _conclusao(inv: Investigacao) -> str:
         base = templates[tipo]
         if freq:
             base += f" Frequencia observada: {freq} ocorrencias."
-        return base
+        return prefixo + base
 
     # Confianca alta mas tipo desconhecido — sintetiza do que tem
     if inv.confianca >= 0.7 and stack:
-        return (
+        return prefixo + (
             f"Sintoma confirmado pelo ticket aberto e evidencias coletadas. "
             f"Stacktrace dominante: {stack}. "
             f"Sem deploy correlato — proximo passo: revisao manual com SRE."
         )
 
-    return "Investigacao inconclusiva — evidencias insuficientes para determinar causa raiz."
+    return prefixo + "Investigacao inconclusiva — evidencias insuficientes para determinar causa raiz."
+
+
+# ---------- publicacao manual (chamada pela UI apos confirmacao) ----------
+
+async def publicar(inv: Investigacao) -> Investigacao:
+    """Executa os efeitos colaterais que `run(auto_publicar=False)` adiou.
+
+    Idempotente: se ja foi publicado (inv.rca_id != None), nao faz nada.
+    Marca encerrado_por_humano=False (autorizado).
+    """
+    veredito = getattr(inv, "_veredito", None)
+    if inv.rca_id or veredito is None or not veredito.aprovado or not inv.ticket:
+        return inv
+    inv.rca_id = analista.registrar_rca(
+        inv.ticket["_id"], _conclusao(inv), inv.evidencias
+    )
+    rca_writer.salvar(inv.relatorio, inv.rca_id)
+    if os.getenv("SENTINEL_GERAR_BACKLOG", "1") != "0":
+        inv.backlog_path = await _gerar_backlog(inv)
+    _persistir_trace(inv, veredito)
+    return inv
+
+
+async def descartar(inv: Investigacao) -> Investigacao:
+    """Usuario rejeitou o preview. Salva markdown com ressalva e grava trace."""
+    inv.encerrado_por_humano = True
+    if inv.ticket:
+        rca_writer.salvar(inv.relatorio, inv.ticket["_id"])
+    veredito = getattr(inv, "_veredito", None)
+    if veredito is not None:
+        _persistir_trace(inv, veredito)
+    return inv
 
 
 # ---------- handoff p/ backlog_decomposer ----------
@@ -331,6 +446,8 @@ def _persistir_trace(inv: Investigacao, veredito: critic.Veredito) -> None:
         "backlog_path": inv.backlog_path,
         "perguntas_humano": inv.perguntas_humano,
         "encerrado_por_humano": inv.encerrado_por_humano,
+        "alinhamento": inv.alinhamento,
+        "motivo_desalinhamento": inv.motivo_desalinhamento,
         "gerado_em": datetime.now(timezone.utc).isoformat(),
     }
     path = os.path.join(TRACES_DIR, f"trace_{ticket_id}.json")
@@ -346,6 +463,7 @@ async def run(
     *,
     perguntar=None,
     confirmar=None,
+    auto_publicar: bool = True,
 ) -> Investigacao:
     """Roda a investigacao.
 
@@ -354,6 +472,8 @@ async def run(
         inv: estado inicial (para retomar). Default: novo.
         perguntar: async callable(str)->str para perguntas abertas (modo interactive).
         confirmar: async callable(str)->bool para acoes sensiveis. None = autoriza tudo.
+        auto_publicar: se False, para no preview — markdown gerado mas registrar_rca/salvar/backlog
+            ficam pra `publicar(inv)`. Usado pela UI Streamlit pra mostrar preview e pedir confirmação.
     """
     if inv is None:
         inv = Investigacao(pergunta=pergunta)
@@ -422,26 +542,27 @@ async def run(
         elif inv.estado == State.PUBLICANDO:
             veredito = inv._veredito  # type: ignore[attr-defined]
             inv.relatorio = output_guard.sanitize(_montar_relatorio(inv, veredito))
-            # Mongo (irreversivel) so com aprovacao + confirmacao humana opcional
-            pode_gravar = inv.ticket and veredito.aprovado
-            if pode_gravar and confirmar is not None:
-                autorizado = await confirmar(
-                    f"Publicar RCA para {inv.cliente['nome'] if inv.cliente else '?'} "
-                    f"(confianca {inv.confianca:.0%})? Acao irreversivel: fecha ticket no Mongo."
-                )
-                if not autorizado:
-                    inv.encerrado_por_humano = True
-                    pode_gravar = False
-            if pode_gravar:
-                inv.rca_id = analista.registrar_rca(
-                    inv.ticket["_id"], _conclusao(inv), inv.evidencias
-                )
-            if inv.ticket:
-                rca_writer.salvar(inv.relatorio, inv.rca_id or inv.ticket["_id"])
-            # Backlog do fix — so quando RCA foi aprovado E autorizado (humano nao negou)
-            if pode_gravar and os.getenv("SENTINEL_GERAR_BACKLOG", "1") != "0":
-                inv.backlog_path = await _gerar_backlog(inv)
-            _persistir_trace(inv, veredito)
+            if auto_publicar:
+                # Mongo (irreversivel) so com aprovacao + confirmacao humana opcional
+                pode_gravar = inv.ticket and veredito.aprovado
+                if pode_gravar and confirmar is not None:
+                    autorizado = await confirmar(
+                        f"Publicar RCA para {inv.cliente['nome'] if inv.cliente else '?'} "
+                        f"(confianca {inv.confianca:.0%})? Acao irreversivel: fecha ticket no Mongo."
+                    )
+                    if not autorizado:
+                        inv.encerrado_por_humano = True
+                        pode_gravar = False
+                if pode_gravar:
+                    inv.rca_id = analista.registrar_rca(
+                        inv.ticket["_id"], _conclusao(inv), inv.evidencias
+                    )
+                if inv.ticket:
+                    rca_writer.salvar(inv.relatorio, inv.rca_id or inv.ticket["_id"])
+                if pode_gravar and os.getenv("SENTINEL_GERAR_BACKLOG", "1") != "0":
+                    inv.backlog_path = await _gerar_backlog(inv)
+                _persistir_trace(inv, veredito)
+            # Se auto_publicar=False: parou no preview. App.py chama publicar(inv) depois.
             inv.estado = State.DONE
 
     _snapshot(State.DONE)
