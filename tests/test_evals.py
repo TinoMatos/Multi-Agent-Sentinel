@@ -102,10 +102,11 @@ SCENARIOS = [
         "expected_keywords": ["deploy", "rollback"],
         "forbidden_keywords": ["stripe", "memory leak", "indice"],
         "min_confianca": 0.70,
-        # Em modo degradado: deploy_suspeito dispara fallback do Tecnico (3 evidencias
-        # marcadas degradado) -> maioria degradado -> Critic veta corretamente.
-        # Em producao com MCPs reais, Tecnico retorna evidencias limpas e Critic aprova.
-        "critic_aprovado": False,
+        # Com memoria habilitada, Triagem pula redelegacao quando dominio do cliente
+        # eh conhecido (memory_adapter.recuperar retorna fatos). Tecnico roda 1x,
+        # acumula 2 evidencias degradadas (de 7 totais = 0.29 < limiar 0.5) — Critic aprova.
+        # Equivalente ao comportamento em producao com MCPs reais.
+        "critic_aprovado": True,
     },
     {
         "id": "beta_db_slow",

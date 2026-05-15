@@ -1,0 +1,7 @@
+cliente: Acme Corp
+fatos:
+  - Acme usa arquitetura multi-tenant com resolveTenant em src/auth/tenant.ts
+  - Deploys da Acme sao monitorados — qualquer null pointer pos-deploy sugere regressao
+  - Acme tem RCA historico de erro 500 em /login resolvido (commit 9988776655aa)
+politicas:
+  - se ha deploy_suspeito + null pointer, priorizar rollback antes de logs

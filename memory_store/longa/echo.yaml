@@ -1,0 +1,6 @@
+cliente: Echo Fintech
+fatos:
+  - Echo faz rolling restart noturno automatico — gera 502 transitorio
+  - Alertas noturnos de Echo sao historicamente falso positivo
+politicas:
+  - alerta de Echo na madrugada + commit hotfix provavel falso positivo

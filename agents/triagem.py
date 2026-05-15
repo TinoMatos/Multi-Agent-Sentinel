@@ -13,7 +13,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
-from agents import analista, critic, observabilidade, rca_writer
+from agents import analista, critic, memory_adapter, observabilidade, rca_writer
 from agents import tecnico as tecnico_mod
 from agents._telemetria import Telemetria
 from guards import output_guard, safeguards
@@ -47,6 +47,7 @@ class Investigacao:
     encerrado_por_humano: bool = False
     alinhamento: float = 1.0          # 0.0-1.0, similaridade pergunta vs ticket encontrado
     motivo_desalinhamento: str | None = None
+    contexto_memoria: dict[str, Any] = field(default_factory=dict)
 
 
 # ---------- hooks dos sub-agentes (Fase 3 plugara MCP/LLM real) ----------
@@ -293,6 +294,21 @@ def _confianca(evidencias: list[dict[str, Any]]) -> float:
     return min(1.0, score)
 
 
+def _memoria_confidente(contexto_memoria: dict | None) -> bool:
+    """True quando memoria identificou cliente E retornou fatos.
+
+    Sinaliza que o dominio do incidente ja eh conhecido — confirmacao adicional
+    via redelegacao do Tecnico tem retorno marginal. Pula redelegacao.
+    """
+    if not contexto_memoria:
+        return False
+    return bool(
+        contexto_memoria.get("habilitada")
+        and contexto_memoria.get("cliente_key")
+        and contexto_memoria.get("fatos")
+    )
+
+
 def _montar_relatorio(inv: Investigacao, veredito: critic.Veredito) -> str:
     return rca_writer.render_rca(
         cliente=inv.cliente["nome"] if inv.cliente else "desconhecido",
@@ -322,7 +338,7 @@ def _diagnosticos() -> dict[str, str]:
     return _DIAGNOSTICOS_CACHE
 
 
-def _conclusao(inv: Investigacao) -> str:
+def _conclusao_base(inv: Investigacao) -> str:
     if not inv.ticket:
         return "Cliente nao encontrado ou sem tickets abertos."
 
@@ -364,6 +380,13 @@ def _conclusao(inv: Investigacao) -> str:
         )
 
     return prefixo + "Investigacao inconclusiva — evidencias insuficientes para determinar causa raiz."
+
+
+def _conclusao(inv: Investigacao) -> str:
+    """Wrapper: anexa contexto historico da memoria, quando disponivel."""
+    base = _conclusao_base(inv)
+    hint = memory_adapter.resumir_para_conclusao(getattr(inv, "contexto_memoria", {}) or {})
+    return base + (f"\n\n{hint}" if hint else "")
 
 
 # ---------- publicacao manual (chamada pela UI apos confirmacao) ----------
@@ -506,6 +529,12 @@ async def run(
                 _call_analista(inv, perguntar=perguntar), _call_observabilidade(inv)
             )
             inv.evidencias.extend(ev_a + ev_o)
+            # Memoria longa/episodica: recupera apos identificar cliente.
+            # Sinaliza dominio conhecido a _memoria_confidente() (pula redelegacao).
+            # SENTINEL_MEMORY_DISABLED=1 forca no-op (eval baseline).
+            if not inv.contexto_memoria:
+                nome_cli = inv.cliente.get("nome") if inv.cliente else None
+                inv.contexto_memoria = memory_adapter.recuperar(inv.pergunta, nome_cli)
             inv.confianca = _confianca(inv.evidencias)
             # Tecnico SEMPRE roda quando ha um ticket — confirmacao ativa
             # eh o ponto do agente. Sem ticket nao adianta (cliente nao existe).
@@ -529,6 +558,7 @@ async def run(
             # (confirmação ativa é onde mora a evidência externa). Limite: 1 retry.
             pode_redelegar = (
                 inv.confianca < 0.8
+                and not _memoria_confidente(inv.contexto_memoria)
                 and inv.redelegacoes < 1
                 and inv.ticket is not None
                 and inv.iteracao + 3 <= limits.max_iterations

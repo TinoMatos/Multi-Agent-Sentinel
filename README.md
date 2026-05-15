@@ -9,12 +9,14 @@ Sistema multiagente que **investiga incidentes técnicos** correlacionando Mongo
 ## Pipeline
 
 ```text
+Memória (longa) ─┐
+                 ▼
 Triagem → [Analista (Mongo) ‖ Observabilidade (Grafana)] → Técnico (FS+Playwright+GitHub) → Critic → RCA → Backlog
               ↑                                              │
-              └────── re-delega se confiança < 80% ──────────┘
+              └─── re-delega se confiança < 80% E memória sem fatos do cliente ───┘
 ```
 
-State machine, `max_iterations=8`, 1 retry. Critic veta antes de publicar (anti-alucinação). Após RCA aprovado, **Backlog Decomposer** quebra o fix em épicos+stories.
+State machine, `max_iterations=8`, 1 retry. Critic veta antes de publicar (anti-alucinação). Após RCA aprovado, **Backlog Decomposer** quebra o fix em épicos+stories. **Memória longa** (`memory_store/longa/<cliente>.yaml`) é consultada após identificar o cliente — quando há fatos do domínio, a redelegação é pulada (economia de ~37% das iterações em modo degradado).
 
 ---
 
@@ -58,7 +60,9 @@ python -m agents.triagem "algo estranho" -i               # interativo: agente p
 python -m agents.backlog_decomposer "objetivo aqui"       # decompor objetivo standalone
 python -m agents.trace_analyzer                           # KPIs de todas as execuções
 python -m contracts.validar                               # valida contratos vs. código
-python -m pytest -q                                       # 57 testes (rodam sem API key)
+python -m pytest -q                                       # testes (rodam sem API key)
+python -m evals.eval_runner                               # impact eval: 8 cenarios x com/sem memoria
+python -m evals.eval_runner --max-casos 3 --skip-sem-memoria   # eval rapido
 ```
 
 CLI não carrega `.env` — exporte as vars ou use Streamlit. Re-rode o seed entre runs (Sentinel fecha o ticket); a CLI já faz auto-reset.
@@ -79,6 +83,27 @@ CLI não carrega `.env` — exporte as vars ou use Streamlit. Re-rode o seed ent
 | Hotel | Erro no novo player | Feature flag rampada a 100% |
 
 Botão **Auto-demo** na UI roda os 8 em sequência.
+
+---
+
+## Memória + Impact Eval
+
+**Memória longa** ([memory_store/longa/](memory_store/longa/)): 1 yaml por cliente com `fatos` (stack, SLOs, peculiaridades) e `politicas` (heurísticas curtas). [memory_adapter.recuperar()](agents/memory_adapter.py) é chamado pela Triagem após identificar o cliente; quando retorna fatos, [_memoria_confidente()](agents/triagem.py) sinaliza domínio conhecido e a state machine pula a redelegação. Flag `SENTINEL_MEMORY_DISABLED=1` desliga (usado pelo eval pra estabelecer baseline).
+
+**Impact Eval** ([evals/](evals/)): dataset de 8 cenários ([evals/datasets/sentinel_cases.json](evals/datasets/sentinel_cases.json)) com `expected_keywords` / `forbidden_keywords` / `contexto_memoria_esperado`. Cada caso roda 2x (com vs sem memória) e mede 8 métricas, comparativo gravado em `reports/evals/sentinel_impact_report_<ts>.md`:
+
+| Métrica | Threshold | O que mede |
+| --- | --- | --- |
+| `rca_correctness` | ≥ 0.75 | keywords esperadas presentes na conclusão |
+| `forbidden_avoidance` | ≥ 0.90 | ausência de cross-contamination entre cenários |
+| `evidence_coverage` | ≥ 0.60 | tipos de evidência mínima presentes |
+| `critic_alignment` | ≥ 0.80 | veredito do Critic bate com esperado |
+| `degraded_ratio` | ≤ 0.50 | % evidências em fallback (negativa) |
+| `retrieval_precision` | ≥ 0.70 | dos fragmentos recuperados, quantos batem |
+| `retrieval_recall` | ≥ 0.50 | dos fragmentos esperados, quantos foram recuperados |
+| `memory_improvement` | ≥ 0.0 (alvo 0.15) | redução combinada iter+redelegacoes com memória |
+
+Baseline atual (3 cenários, modo degradado): 8/8 PASS, `memory_improvement = 0.44`.
 
 ---
 
@@ -110,6 +135,7 @@ Botão **Auto-demo** na UI roda os 8 em sequência.
 | `SENTINEL_MAX_ITERATIONS` | `8` (caminho natural 5 + 3 pro retry) |
 | `SENTINEL_OBS_TIMEOUT_S` / `_TECNICO_TIMEOUT_S` | `60` / `90` |
 | `SENTINEL_GERAR_BACKLOG` | `1` (decompõe fix após RCA aprovado). `0` desliga. |
+| `SENTINEL_MEMORY_DISABLED` | `0` (memória ativa). `1` força no-op — usado pelo impact eval pra baseline. |
 
 Lista completa: [.env.example](.env.example).
 
@@ -118,15 +144,17 @@ Lista completa: [.env.example](.env.example).
 ## Estrutura
 
 ```text
-agents/         8 agentes + helpers (_llm, _sdk_bridge, _telemetria, seed_helper)
+agents/         8 agentes + memory_adapter + helpers (_llm, _sdk_bridge, _telemetria, seed_helper)
 contracts/     8 × 5 specs + validar.py + analise-agente.md
 guards/        output_guard (PII) + safeguards (max_iter, token budget)
 mcp/config.json   5 MCPs (filesystem, mongodb, grafana, playwright, github)
 config/        llm.json + precos.json + diagnosticos.json
 data/          seed_mongo.js + logs/ + traces/
+memory_store/longa/   8 yamls (1 por cliente: fatos + politicas)
+evals/         datasets/sentinel_cases.json + suites/sentinel_impact_eval.yaml + eval_runner.py
 app.py         UI Streamlit
-tests/         57 casos pytest
-reports/       RCAs + backlogs gerados
+tests/         testes pytest (rodam sem API key)
+reports/       RCAs + backlogs gerados; reports/evals/ recebe relatorios do impact eval
 ```
 
 ---

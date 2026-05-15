@@ -1,0 +1,6 @@
+cliente: Delta Health
+fatos:
+  - Delta tem limite de 4GB no heap dos pods da API
+  - Pods da Delta sao reiniciados manualmente quando heap cresce sem deploy
+politicas:
+  - OOM_KILLED sem deploy recente investigar leak gradual de heap

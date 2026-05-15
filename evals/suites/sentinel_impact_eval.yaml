@@ -1,0 +1,28 @@
+# Eval Suite — Impacto do Sentinel (com vs sem memoria)
+# Espelha o padrao do aula15/memory_impact_eval, adaptado ao dominio de RCA.
+
+dataset: sentinel_cases.json
+
+comparativo:
+  baseline: execucao_sem_memoria   # SENTINEL_MEMORY_DISABLED=1
+  com_memoria: execucao_com_memoria
+
+metrics:
+  - rca_correctness          # % expected_keywords presentes na conclusao
+  - forbidden_avoidance      # 1 - % forbidden_keywords vazadas (anti-cross-contamination)
+  - evidence_coverage        # % de tipos de evidencia minima presentes
+  - critic_alignment         # veredito do Critic bate com o esperado (boolean -> 0/1)
+  - degraded_ratio           # % de evidencias degradadas (negativa: menor = melhor)
+  - memory_improvement       # reducao de iteracoes/redelegacoes com memoria
+  - retrieval_precision      # dos fragmentos recuperados, quantos batem com o esperado
+  - retrieval_recall         # dos fragmentos esperados, quantos foram recuperados
+
+thresholds:
+  rca_correctness: 0.75
+  forbidden_avoidance: 0.90
+  evidence_coverage: 0.60
+  critic_alignment: 0.80
+  degraded_ratio: 0.50          # max — em modo degradado sobe; com MCPs reais cai
+  memory_improvement: 0.0       # piso inicial — sobe quando memoria mudar decisao (alvo 0.15)
+  retrieval_precision: 0.70
+  retrieval_recall: 0.50

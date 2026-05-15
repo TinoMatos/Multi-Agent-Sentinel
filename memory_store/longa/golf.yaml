@@ -1,0 +1,6 @@
+cliente: Golf Bank
+fatos:
+  - Golf rotaciona secrets do worker semanalmente via Vault
+  - Workers de conciliacao da Golf nao tem retry com refresh automatico de secret
+politicas:
+  - worker parado sem deploy + erro de auth checar rotacao de secret

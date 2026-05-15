@@ -1,0 +1,130 @@
+[
+  {
+    "id": "acme_deploy_regression",
+    "pergunta": "Por que o sistema da Acme esta caindo?",
+    "cliente_esperado": "Acme Corp",
+    "expected_keywords": ["deploy", "rollback"],
+    "forbidden_keywords": ["stripe", "memory leak", "indice", "rate-limit", "secret", "feature flag"],
+    "evidencias_minimas": ["mongo", "erro", "commit"],
+    "min_confianca": 0.70,
+    "critic_aprovado": true,
+    "contexto_memoria_esperado": {
+      "fatos": ["Acme usa multi-tenant com resolveTenant em src/auth/tenant.ts"],
+      "episodios": ["incidente_anterior: commit 9988776655aa causou erro 500 esporadico em /login"],
+      "licoes": ["se ha deploy_suspeito + null pointer, priorizar rollback antes de logs"]
+    },
+    "decisao_esperada_com_memoria": "rollback imediato + abrir hotfix em src/auth/tenant.ts"
+  },
+  {
+    "id": "beta_db_slow_query",
+    "pergunta": "Por que o painel administrativo da Beta SaaS esta lento?",
+    "cliente_esperado": "Beta SaaS",
+    "expected_keywords": ["query", "indice"],
+    "forbidden_keywords": ["stripe", "deploy", "memory leak", "feature flag", "secret"],
+    "evidencias_minimas": ["mongo", "erro", "grafana"],
+    "min_confianca": 0.50,
+    "critic_aprovado": true,
+    "contexto_memoria_esperado": {
+      "fatos": ["Beta usa MongoDB sem indice em coleção de auditoria do painel admin"],
+      "episodios": [],
+      "licoes": ["TIMEOUT_DB sem deploy correlato geralmente é indice ausente"]
+    },
+    "decisao_esperada_com_memoria": "verificar plano de execucao da query + criar indice"
+  },
+  {
+    "id": "gama_external_dependency",
+    "pergunta": "Por que os pagamentos da Gama Logistica estao falhando?",
+    "cliente_esperado": "Gama Logistica",
+    "expected_keywords": ["dependencia externa", "circuit breaker"],
+    "forbidden_keywords": ["memory leak", "indice", "feature flag", "secret rotation"],
+    "evidencias_minimas": ["mongo", "erro", "grafana"],
+    "min_confianca": 0.50,
+    "critic_aprovado": true,
+    "contexto_memoria_esperado": {
+      "fatos": ["Gama depende de Stripe (api.stripe.com) para checkout"],
+      "episodios": [],
+      "licoes": ["EXTERNAL_API_TIMEOUT recorrente exige circuit breaker"]
+    },
+    "decisao_esperada_com_memoria": "verificar status page do Stripe + ativar circuit breaker"
+  },
+  {
+    "id": "delta_memory_leak",
+    "pergunta": "Por que os pods da API Delta Health estao reiniciando?",
+    "cliente_esperado": "Delta Health",
+    "expected_keywords": ["memory leak", "heap"],
+    "forbidden_keywords": ["stripe", "deploy ruim", "indice", "feature flag"],
+    "evidencias_minimas": ["mongo", "erro", "grafana"],
+    "min_confianca": 0.50,
+    "critic_aprovado": true,
+    "contexto_memoria_esperado": {
+      "fatos": ["Delta tem limite de 4GB no heap dos pods da API"],
+      "episodios": [],
+      "licoes": ["OOM_KILLED sem deploy recente: investigar leak gradual de heap"]
+    },
+    "decisao_esperada_com_memoria": "tirar heap dump + analisar growth rate"
+  },
+  {
+    "id": "echo_false_positive",
+    "pergunta": "Por que o sistema da Echo Fintech disparou alertas de madrugada?",
+    "cliente_esperado": "Echo Fintech",
+    "expected_keywords": ["restart", "falso positivo"],
+    "forbidden_keywords": ["memory leak", "stripe", "indice"],
+    "evidencias_minimas": ["mongo", "erro"],
+    "min_confianca": 0.30,
+    "critic_aprovado": true,
+    "contexto_memoria_esperado": {
+      "fatos": ["Echo faz rolling restart noturno automatico — gera 502 transitorio"],
+      "episodios": ["historico: alertas noturnos de Echo são quase sempre falso positivo"],
+      "licoes": ["alerta de Echo na madrugada + commit hotfix: provavel falso positivo"]
+    },
+    "decisao_esperada_com_memoria": "marcar como falso positivo, nao publicar RCA"
+  },
+  {
+    "id": "foxtrot_cascade_rate_limit",
+    "pergunta": "Por que a busca e recomendacoes do Foxtrot estao caindo?",
+    "cliente_esperado": "Foxtrot Marketplace",
+    "expected_keywords": ["rate", "limit"],
+    "forbidden_keywords": ["deploy", "stripe", "memory leak", "indice"],
+    "evidencias_minimas": ["mongo", "erro"],
+    "min_confianca": 0.40,
+    "critic_aprovado": true,
+    "contexto_memoria_esperado": {
+      "fatos": ["Foxtrot tem dependencia em cascata: busca → recomendacoes → catalogo"],
+      "episodios": [],
+      "licoes": ["falha em servico downstream + intermitente: investigar rate-limit"]
+    },
+    "decisao_esperada_com_memoria": "verificar rate-limits dos servicos downstream"
+  },
+  {
+    "id": "golf_secret_rotation",
+    "pergunta": "Por que os workers de conciliacao da Golf Bank pararam?",
+    "cliente_esperado": "Golf Bank",
+    "expected_keywords": ["secret", "auth"],
+    "forbidden_keywords": ["deploy", "stripe", "memory leak", "indice", "feature flag"],
+    "evidencias_minimas": ["mongo", "erro"],
+    "min_confianca": 0.40,
+    "critic_aprovado": true,
+    "contexto_memoria_esperado": {
+      "fatos": ["Golf rotaciona secrets do worker semanalmente via Vault"],
+      "episodios": [],
+      "licoes": ["worker parado sem deploy + erro de auth: checar rotacao de secret"]
+    },
+    "decisao_esperada_com_memoria": "verificar ultima rotacao de secret no Vault + redeploy workers"
+  },
+  {
+    "id": "hotel_feature_flag",
+    "pergunta": "Por que o novo player da Hotel Streaming esta com tela branca?",
+    "cliente_esperado": "Hotel Streaming",
+    "expected_keywords": ["feature flag", "rampada"],
+    "forbidden_keywords": ["deploy", "stripe", "memory leak", "indice", "secret"],
+    "evidencias_minimas": ["mongo", "erro"],
+    "min_confianca": 0.40,
+    "critic_aprovado": true,
+    "contexto_memoria_esperado": {
+      "fatos": ["Hotel rampou feature flag new_player_v2 para 100% dos free users"],
+      "episodios": [],
+      "licoes": ["erro novo coincidindo com rampa de flag: rollback da flag antes do deploy"]
+    },
+    "decisao_esperada_com_memoria": "rollback da feature flag para 0% antes de qualquer fix"
+  }
+]

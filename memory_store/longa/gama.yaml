@@ -1,0 +1,6 @@
+cliente: Gama Logistica
+fatos:
+  - Gama depende de Stripe (api.stripe.com) para checkout
+  - Gama nao tem circuit breaker configurado para pagamentos externos
+politicas:
+  - EXTERNAL_API_TIMEOUT recorrente exige circuit breaker
