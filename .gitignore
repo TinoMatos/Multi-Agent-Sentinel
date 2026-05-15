@@ -5,6 +5,7 @@ __pycache__/
 venv/
 .pytest_cache/
 reports/*.md
+reports/evals/
 !reports/.gitkeep
 node_modules/
 .playwright-mcp/
