@@ -30,8 +30,31 @@ st.markdown(
     """
 <style>
 /* esconder elementos default do streamlit */
-#MainMenu, footer, header[data-testid="stHeader"] {visibility: hidden;}
+#MainMenu, footer, header[data-testid="stHeader"] {visibility: hidden; height: 0 !important;}
 .stDeployButton {display:none !important;}
+
+/* remover padding-top exagerado do container principal */
+.block-container, [data-testid="stMainBlockContainer"] {
+    padding-top: 1rem !important;
+    padding-bottom: 2rem !important;
+}
+section[data-testid="stSidebar"] > div,
+section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"],
+section[data-testid="stSidebar"] [data-testid="stSidebarContent"],
+section[data-testid="stSidebar"] .block-container {
+    padding-top: 0.5rem !important;
+    margin-top: 0 !important;
+    gap: 0.3rem !important;
+}
+section[data-testid="stSidebar"] [data-testid="stSidebarHeader"] {
+    padding: 0.25rem 0.5rem !important;
+    min-height: 0 !important;
+    height: auto !important;
+    margin-bottom: 0 !important;
+}
+section[data-testid="stSidebar"] [data-testid="stSidebarHeader"] + div {
+    margin-top: -1.5rem !important;
+}
 
 /* fundo com gradiente sutil */
 .stApp {
@@ -339,6 +362,108 @@ section.main, [data-testid="stAppViewContainer"] > .main {
     margin-left: 320px !important;
 }
 
+/* barra de status horizontal (topo) */
+.status-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0.6rem 0 1.4rem 0;
+    padding: 0.7rem 1rem;
+    background:
+        radial-gradient(ellipse at top left, rgba(99,102,241,0.08), transparent 60%),
+        linear-gradient(135deg, rgba(15,23,42,0.7), rgba(10,14,26,0.5));
+    border: 1px solid rgba(99,102,241,0.18);
+    border-radius: 14px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.03);
+}
+.status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0.85rem;
+    background: rgba(30,41,59,0.55);
+    border: 1px solid rgba(71,85,105,0.3);
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: #e2e8f0;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+.status-chip:hover {
+    border-color: rgba(99,102,241,0.4);
+    background: rgba(30,41,59,0.8);
+    transform: translateY(-1px);
+}
+.status-chip .status-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    box-shadow: 0 0 8px currentColor;
+}
+.status-chip .chip-label {
+    color: #64748b;
+    font-size: 0.68rem;
+    margin-left: 0.2rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+}
+
+/* polish: idle state pills mais visiveis */
+.state-pill {
+    background: rgba(30,41,59,0.4);
+    color: #94a3b8;
+    border: 1px solid rgba(71,85,105,0.35);
+}
+.pill-arrow { color: #334155; }
+
+/* input custom mais bonito */
+div[data-testid="stTextInput"] input {
+    background: rgba(15,23,42,0.6) !important;
+    border: 1px solid rgba(99,102,241,0.2) !important;
+    border-radius: 10px !important;
+    padding: 0.7rem 1rem !important;
+    color: #e2e8f0 !important;
+    font-size: 0.95rem !important;
+    transition: all 0.2s ease !important;
+}
+div[data-testid="stTextInput"] input:focus {
+    border-color: rgba(99,102,241,0.6) !important;
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.15) !important;
+    background: rgba(15,23,42,0.85) !important;
+}
+div[data-testid="stTextInput"] label {
+    color: #cbd5e1 !important;
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.02em !important;
+}
+
+/* radio (cenarios) mais polido */
+div[data-testid="stRadio"] label {
+    transition: color 0.15s ease;
+    padding: 0.15rem 0;
+}
+div[data-testid="stRadio"] label:hover { color: #a5b4fc !important; }
+
+/* info banner mais bonito */
+div[data-testid="stAlert"] {
+    border-radius: 12px !important;
+    border: 1px solid rgba(99,102,241,0.2) !important;
+    background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(139,92,246,0.04)) !important;
+}
+
+/* hero badges com glow sutil */
+.hero-badge {
+    box-shadow: 0 0 12px rgba(99,102,241,0.15);
+    transition: all 0.2s ease;
+}
+.hero-badge:hover {
+    box-shadow: 0 0 18px rgba(99,102,241,0.35);
+    transform: translateY(-1px);
+}
+
 /* RCA box */
 .rca-box {
     background: rgba(15,23,42,0.4);
@@ -371,8 +496,6 @@ with st.sidebar:
     st.caption("Multi-Agent Technical Sentinel")
     st.divider()
 
-    st.markdown("##### Status dos componentes")
-
     @st.cache_data(ttl=30)
     def _check_status():
         status = {}
@@ -402,14 +525,6 @@ with st.sidebar:
             status["GitHub MCP"] = ("ok", "ativo")
         return status
 
-    for nome, (estado, label_st) in _check_status().items():
-        st.markdown(
-            f'<div class="status-item"><span class="status-dot {estado}"></span>'
-            f'{nome}<span style="margin-left:auto;color:#64748b;font-size:0.72rem;">{label_st}</span></div>',
-            unsafe_allow_html=True,
-        )
-
-    st.divider()
     st.markdown("##### Cenários do seed")
     cenarios = {
         "✏️ Custom (sua pergunta)": None,
@@ -440,32 +555,11 @@ with st.sidebar:
         ),
     )
     cenario = cenarios[label]
-    pergunta = (
-        st.text_input("Pergunta custom:", value="")
-        if cenario is None
-        else cenario
-    )
-    # --- Clarificação inline: se pergunta custom não identifica cliente, perguntar aqui mesmo ---
-    if cenario is None and pergunta:
-        from agents.triagem import _extrair_nome_cliente as _ext
-        if not _ext(pergunta):
-            from agents import analista as _an
-            try:
-                _nomes = [c["nome"] for c in _an._db().clientes.find({}, {"nome": 1})]
-            except Exception:
-                _nomes = []
-            if _nomes:
-                st.caption("🤝 Cliente não identificado — selecione:")
-                _sel = st.selectbox(
-                    "Cliente:",
-                    options=[None] + _nomes,
-                    index=0,
-                    format_func=lambda x: "— escolha um cliente —" if x is None else x,
-                    key="sidebar_cliente_sel",
-                    label_visibility="collapsed",
-                )
-                if _sel:
-                    pergunta = f"{pergunta} (cliente: {_sel})"
+    if cenario is None:
+        st.caption("👉 Digite sua pergunta no topo da página principal.")
+        pergunta = ""  # preenchida abaixo, fora da sidebar
+    else:
+        pergunta = cenario
     auto_reset = st.checkbox(
         "🔄 Auto-reset (reabre ticket antes)",
         value=True,
@@ -515,6 +609,41 @@ st.markdown(
 """,
     unsafe_allow_html=True,
 )
+
+# ---------- barra de status horizontal ----------
+_chips = "".join(
+    f'<span class="status-chip"><span class="status-dot {estado}"></span>{nome}'
+    f'<span class="chip-label">{label_st}</span></span>'
+    for nome, (estado, label_st) in _check_status().items()
+)
+st.markdown(f'<div class="status-bar">{_chips}</div>', unsafe_allow_html=True)
+
+# ---------- input custom (so aparece quando o usuario escolhe "Custom" na sidebar) ----------
+if cenario is None:
+    pergunta = st.text_input(
+        "Pergunta custom:",
+        value="",
+        placeholder="Ex.: por que a API da Acme esta caindo desde as 14h?",
+        key="pergunta_custom_main",
+    )
+    if pergunta:
+        from agents.triagem import _extrair_nome_cliente as _ext
+        if not _ext(pergunta):
+            from agents import analista as _an
+            try:
+                _nomes = [c["nome"] for c in _an._db().clientes.find({}, {"nome": 1})]
+            except Exception:
+                _nomes = []
+            if _nomes:
+                _sel = st.selectbox(
+                    "🤝 Cliente nao identificado — selecione:",
+                    options=[None] + _nomes,
+                    index=0,
+                    format_func=lambda x: "— escolha um cliente —" if x is None else x,
+                    key="main_cliente_sel",
+                )
+                if _sel:
+                    pergunta = f"{pergunta} (cliente: {_sel})"
 
 estados_pills = ["HIPOTESE", "COLETANDO", "CONFIRMANDO", "VALIDANDO", "PUBLICANDO", "DONE"]
 

@@ -41,7 +41,7 @@ python -m streamlit run app.py                                  # UI em http://l
 | Observabilidade | task_based | Grafana MCP (alertas, métricas) |
 | Técnico | task_based | filesystem + playwright + github MCPs |
 | Critic | task_based | heurísticas + sanity LLM, veta RCAs alucinados |
-| RCA Writer | task_based | renderiza markdown |
+| RCA Writer | task_based + **ReAct** | renderiza markdown; `executar_react()` segue [architectures/react/planner.md](../architectures/react/planner.md) — `raciocinio` explícito, ações `CHAMAR_FERRAMENTA` / `FINALIZAR` / `PERGUNTAR_USUARIO` |
 | Trace Analyzer | task_based | KPIs de `data/traces/*.json` |
 | Backlog Decomposer | goal_oriented | decompõe fix em épicos+stories+riscos |
 
@@ -58,7 +58,7 @@ python -m agents.triagem "algo estranho" -i               # interativo: agente p
 python -m agents.backlog_decomposer "objetivo aqui"       # decompor objetivo standalone
 python -m agents.trace_analyzer                           # KPIs de todas as execuções
 python -m contracts.validar                               # valida contratos vs. código
-python -m pytest -q                                       # 51 testes (rodam sem API key)
+python -m pytest -q                                       # 57 testes (rodam sem API key)
 ```
 
 CLI não carrega `.env` — exporte as vars ou use Streamlit. Re-rode o seed entre runs (Sentinel fecha o ticket); a CLI já faz auto-reset.
@@ -94,6 +94,8 @@ Botão **Auto-demo** na UI roda os 8 em sequência.
 
 **Handoff produto:** RCA aprovado → `backlog_decomposer` decompõe o fix em `reports/backlog_<id>.md`. Falha do backlog não derruba a investigação.
 
+**Loop ReAct (Reason+Act):** `rca_writer.executar_react(planner=...)` implementa o contrato em [architectures/react/planner.md](../architectures/react/planner.md): cada passo exige `raciocinio` + `criterio_sucesso` antes de escolher `CHAMAR_FERRAMENTA` (`registrar_evidencia` / `finalizar`), `FINALIZAR` ou `PERGUNTAR_USUARIO`. `planner_prompt()` gera o system prompt com schema JSON e as 6 regras de raciocínio (ex: *só FINALIZAR quando todas as evidências foram coletadas*). O loop é testável com planner determinístico — sem dependência de LLM nos testes.
+
 ---
 
 ## Variáveis
@@ -123,7 +125,7 @@ mcp/config.json   5 MCPs (filesystem, mongodb, grafana, playwright, github)
 config/        llm.json + precos.json + diagnosticos.json
 data/          seed_mongo.js + logs/ + traces/
 app.py         UI Streamlit
-tests/         51 casos pytest
+tests/         57 casos pytest
 reports/       RCAs + backlogs gerados
 ```
 
