@@ -2,5 +2,6 @@ cliente: Beta SaaS
 fatos:
   - Beta usa MongoDB sem indice em coleção de auditoria do painel admin
   - SLO do painel da Beta e 2s no p95
-politicas:
-  - TIMEOUT_DB sem deploy correlato geralmente e indice ausente
+heuristicas:
+  - TIMEOUT_DB sem deploy correlato historicamente aponta para indice ausente — pedir plano de execucao antes de prescrever createIndex
+nota_memoria: heuristicas sao hipoteses a investigar. Evidencias frescas (grafana, runbook) tem prioridade sobre memoria longa.

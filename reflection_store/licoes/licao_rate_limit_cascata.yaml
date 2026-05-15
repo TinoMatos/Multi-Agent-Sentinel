@@ -1,0 +1,8 @@
+id: licao_rate_limit_cascata
+origem: incidente_foxtrot_001
+criada_em: 2025-08-05
+licao: falha em servico downstream + comportamento intermitente investigar rate-limit
+contexto: degradacao em cascata frequentemente origina de quota saturada em servico de base
+aplicavel_quando:
+  - sintoma_contem: ["intermitente", "downstream", "busca", "recomendacoes"]
+acao_sugerida: verificar rate-limits dos servicos downstream + considerar bulkhead

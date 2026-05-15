@@ -1,0 +1,18 @@
+id: licao_auto_acme_20260515_064754
+origem: reflection_automatico
+criada_em: '2026-05-15'
+gatilho: 'critic_vetou: contradicao LLM: Conclusão recomenda rollback imediato baseado
+  em ''regressao do mesmo bug'', mas não há confirmação de di'
+cliente: Acme Corp
+licao: 'investigacao para sintoma ''Por que o sistema da Acme esta caindo?'' em Acme
+  Corp foi vetada pelo critic — motivos: contradicao LLM: Conclusão recomenda rollback
+  imediato baseado em ''regressao do mesmo bug'', mas não há confirmação de diff do
+  commit atual versus commit histórico (9988776655aa) — GitHub API inacessível impede
+  validação da equivalência de código; contradicao LLM: Contexto histórico exige ''confirmar
+  diff do commit atual antes de equiparar a este episodio'', porém a conclusão já
+  equipara e recomenda ação sem essa confirmação prévia realizada; contradicao LLM:
+  Evidências mostram TypeError específico em resolveTenant (Cannot read properties
+  of undefined), mas faltam logs acessíveis (MCP filesystem indisponível) para confirmar
+  se a causa é idêntica ao episódio de 2026-03-12 ou uma variação diferente. Antes
+  de publicar, garantir evidencias nao-degradadas e revisar contradicoes.'
+trace_id: null

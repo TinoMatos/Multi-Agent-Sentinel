@@ -1,0 +1,8 @@
+id: licao_circuit_breaker
+origem: incidente_gama_001
+criada_em: 2025-10-06
+licao: EXTERNAL_API_TIMEOUT recorrente exige circuit breaker
+contexto: timeouts repetidos de API externa derrubam o sistema chamador se nao houver isolamento
+aplicavel_quando:
+  - sintoma_contem: ["timeout", "dependencia externa", "stripe", "payment"]
+acao_sugerida: verificar status page do provedor + ativar circuit breaker

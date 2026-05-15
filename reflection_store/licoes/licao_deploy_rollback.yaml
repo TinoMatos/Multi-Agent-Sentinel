@@ -1,0 +1,9 @@
+id: licao_deploy_rollback
+origem: incidente_acme_001
+criada_em: 2025-09-13
+licao: se ha deploy_suspeito + null pointer pos-deploy, priorizar rollback antes de logs
+contexto: incidentes de regressao apos deploy sao identificados mais rapido por rollback do que por investigacao de logs
+aplicavel_quando:
+  - tipo_alerta_contem: "deploy"
+  - sintoma_contem: ["null pointer", "500", "regressao"]
+acao_sugerida: rollback imediato + investigar diff do commit

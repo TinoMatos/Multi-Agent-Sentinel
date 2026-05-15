@@ -28,6 +28,12 @@ from pathlib import Path
 
 import yaml
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
 from agents import triagem
 from agents.seed_helper import reset_tickets
 
@@ -152,6 +158,90 @@ def _calc_recall(recuperados: list, esperados: list) -> float:
     return encontrados / len(esperados)
 
 
+def _tokens_significativos(texto: str) -> set:
+    import re
+    return {t for t in re.findall(r"[a-z0-9]+", (texto or "").lower()) if len(t) > 3}
+
+
+def _memory_utilization(relatorio: str, recuperados: list) -> float:
+    """Fracao de fragmentos recuperados cujos tokens aparecem no relatorio."""
+    if not recuperados:
+        return 1.0  # nao havia o que utilizar — neutro
+    toks_rel = _tokens_significativos(relatorio)
+    if not toks_rel:
+        return 0.0
+    usados = 0
+    for frag in recuperados:
+        toks_f = _tokens_significativos(frag)
+        if not toks_f:
+            continue
+        # consideramos "utilizado" se >=30% dos tokens do fragmento estao no relatorio
+        overlap = len(toks_f & toks_rel) / len(toks_f)
+        if overlap >= 0.3:
+            usados += 1
+    return usados / len(recuperados)
+
+
+def _hallucination_from_memory(relatorio: str, recuperados: list, evidencias: list) -> float:
+    """Fracao de tokens significativos da conclusao que NAO aparecem nem em memoria nem em evidencias.
+
+    Quanto MENOR melhor (metrica negativa).
+    """
+    toks_rel = _tokens_significativos(relatorio)
+    if not toks_rel:
+        return 0.0
+    ancorados = _tokens_significativos(" ".join(recuperados))
+    for ev in evidencias or []:
+        if isinstance(ev, dict):
+            ancorados |= _tokens_significativos(
+                " ".join(str(v) for v in ev.values())
+            )
+    if not ancorados:
+        return 0.0
+    novos = toks_rel - ancorados
+    # filtra stopwords-de-dominio (palavras genericas que sempre aparecem em RCA)
+    ruido = {"esta", "para", "como", "este", "esse", "essa", "issue", "causa", "rca", "incidente"}
+    novos -= ruido
+    return round(len(novos) / max(len(toks_rel), 1), 3)
+
+
+def _lesson_quality() -> float:
+    """Le reflection_store/licoes/ e mede qualidade media.
+
+    Heuristica: licao precisa ter >=6 tokens significativos e nao ser duplicada-textual.
+    Retorna 0.0 quando store esta vazio (FAIL automatico — espelha aula15).
+    """
+    from pathlib import Path as _P
+    import yaml as _y
+    licoes_dir = ROOT / "reflection_store" / "licoes"
+    if not licoes_dir.exists():
+        return 0.0
+    arquivos = list(licoes_dir.glob("*.yaml"))
+    if not arquivos:
+        return 0.0
+    pontuacoes = []
+    vistos = set()
+    for arq in arquivos:
+        try:
+            data = _y.safe_load(arq.read_text(encoding="utf-8")) or {}
+        except Exception:
+            continue
+        texto = str(data.get("licao", ""))
+        toks = _tokens_significativos(texto)
+        if len(toks) < 6:
+            pontuacoes.append(0.3)
+            continue
+        chave = " ".join(sorted(toks))
+        if chave in vistos:
+            pontuacoes.append(0.5)
+        else:
+            vistos.add(chave)
+            pontuacoes.append(1.0)
+    if not pontuacoes:
+        return 0.0
+    return round(sum(pontuacoes) / len(pontuacoes), 3)
+
+
 def _memory_improvement(iter_sem: int, redel_sem: int, iter_com: int, redel_com: int) -> float:
     """Reducao combinada de iteracoes + redelegacoes. 0 quando memoria nao esta plugada."""
     custo_sem = iter_sem + redel_sem * 2
@@ -230,6 +320,8 @@ async def executar_eval(caminho_suite: Path, max_casos: int | None, skip_sem_mem
         esperados = _esperados_unificados(caso)
         ret_prec = _calc_precision(recuperados, esperados)
         ret_rec = _calc_recall(recuperados, esperados)
+        mem_util = _memory_utilization(inv.relatorio or "", recuperados)
+        hall = _hallucination_from_memory(inv.relatorio or "", recuperados, inv.evidencias)
 
         cliente_ok = (inv.cliente is not None
                       and inv.cliente.get("nome") == caso.get("cliente_esperado"))
@@ -257,6 +349,8 @@ async def executar_eval(caminho_suite: Path, max_casos: int | None, skip_sem_mem
             "memory_improvement": round(improv, 3),
             "retrieval_precision": round(ret_prec, 3),
             "retrieval_recall": round(ret_rec, 3),
+            "memory_utilization": round(mem_util, 3),
+            "hallucination_from_memory": round(hall, 3),
             "n_recuperados": len(recuperados),
             "n_esperados": len(esperados),
         }
@@ -266,6 +360,7 @@ async def executar_eval(caminho_suite: Path, max_casos: int | None, skip_sem_mem
             f"  corr={rca_corr:.2f} forb={forb:.2f} cov={ev_cov:.2f} "
             f"crit={crit:.2f} deg={deg:.2f} improv={improv:.2f} "
             f"ret_p={ret_prec:.2f} ret_r={ret_rec:.2f} "
+            f"util={mem_util:.2f} hall={hall:.2f} "
             f"(iter sem={iter_sem} com={inv.iteracao})"
         )
 
@@ -278,8 +373,11 @@ async def executar_eval(caminho_suite: Path, max_casos: int | None, skip_sem_mem
         "rca_correctness", "forbidden_avoidance", "evidence_coverage",
         "critic_alignment", "degraded_ratio", "memory_improvement",
         "retrieval_precision", "retrieval_recall",
+        "memory_utilization", "hallucination_from_memory", "lesson_quality",
     ]
-    agregadas = {m: _media(m) for m in metricas}
+    agregadas = {m: _media(m) for m in metricas if m != "lesson_quality"}
+    # lesson_quality e global (le reflection_store/licoes/), nao media por caso
+    agregadas["lesson_quality"] = _lesson_quality()
 
     status = {}
     for m, valor in agregadas.items():
@@ -287,7 +385,7 @@ async def executar_eval(caminho_suite: Path, max_casos: int | None, skip_sem_mem
             status[m] = "N/A"
             continue
         limiar = thresholds[m]
-        if m == "degraded_ratio":
+        if m in ("degraded_ratio", "hallucination_from_memory"):
             status[m] = "PASS" if valor <= limiar else "FAIL"
         else:
             status[m] = "PASS" if valor >= limiar else "FAIL"
@@ -345,7 +443,8 @@ def _gerar_relatorio_md(agregadas, thresholds, status, resultados, tempo_total) 
     md.append("|---------|-------|-----------|--------|")
     for m in ["rca_correctness", "forbidden_avoidance", "evidence_coverage",
               "critic_alignment", "degraded_ratio", "memory_improvement",
-              "retrieval_precision", "retrieval_recall"]:
+              "retrieval_precision", "retrieval_recall",
+              "memory_utilization", "hallucination_from_memory", "lesson_quality"]:
         val = agregadas.get(m, 0)
         thr = thresholds.get(m, "—")
         st = status.get(m, "N/A")

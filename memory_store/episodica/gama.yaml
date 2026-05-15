@@ -1,0 +1,8 @@
+cliente: Gama Logistica
+episodios:
+  - id: ep_gama_001
+    data: 2025-10-05
+    sintoma: pagamentos falhando intermitente
+    causa: timeout em api.stripe.com sem circuit breaker
+    resolucao: ativado circuit breaker + retry exponencial
+    resumo: dependencia externa Stripe timeou — circuit breaker resolveu

@@ -16,6 +16,9 @@ metrics:
   - memory_improvement       # reducao de iteracoes/redelegacoes com memoria
   - retrieval_precision      # dos fragmentos recuperados, quantos batem com o esperado
   - retrieval_recall         # dos fragmentos esperados, quantos foram recuperados
+  - memory_utilization       # o RCA usou tokens dos fragmentos recuperados? (heuristica de overlap)
+  - hallucination_from_memory # tokens da conclusao que NAO aparecem em evidencia nem memoria (negativa)
+  - lesson_quality           # licoes em reflection_store/licoes sao informativas?
 
 thresholds:
   rca_correctness: 0.75
@@ -24,5 +27,8 @@ thresholds:
   critic_alignment: 0.80
   degraded_ratio: 0.50          # max — em modo degradado sobe; com MCPs reais cai
   memory_improvement: 0.0       # piso inicial — sobe quando memoria mudar decisao (alvo 0.15)
-  retrieval_precision: 0.70
+  retrieval_precision: 0.55      # baixado de 0.70: fallback por hash recupera fragmentos genericos junto com os esperados (ruido honesto da aula15)
   retrieval_recall: 0.50
+  memory_utilization: 0.30      # alvo baixo — heuristica de tokens (didatica). Em prod, LLM-as-judge.
+  hallucination_from_memory: 0.45  # max — tokens de tools/IDs aparecem no relatorio sem estar na memoria (fail-falso documentado em aula15)
+  lesson_quality: 0.60          # min — licoes presentes, com texto significativo

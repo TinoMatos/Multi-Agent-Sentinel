@@ -9,14 +9,16 @@ Sistema multiagente que **investiga incidentes técnicos** correlacionando Mongo
 ## Pipeline
 
 ```text
-Memória (longa) ─┐
-                 ▼
+Memória (longa + episódica + contextual + lições) ─┐
+                                                   ▼
 Triagem → [Analista (Mongo) ‖ Observabilidade (Grafana)] → Técnico (FS+Playwright+GitHub) → Critic → RCA → Backlog
-              ↑                                              │
-              └─── re-delega se confiança < 80% E memória sem fatos do cliente ───┘
+              ↑                                                      │                       │
+              └── re-delega se confiança < 80% E memória sem fatos ──┘                       ▼
+                                                                                       Reflection
+                                                                              (extrai lição se veto/baixa conf./max iter)
 ```
 
-State machine, `max_iterations=8`, 1 retry. Critic veta antes de publicar (anti-alucinação). Após RCA aprovado, **Backlog Decomposer** quebra o fix em épicos+stories. **Memória longa** (`memory_store/longa/<cliente>.yaml`) é consultada após identificar o cliente — quando há fatos do domínio, a redelegação é pulada (economia de ~37% das iterações em modo degradado).
+State machine, `max_iterations=8`, 1 retry. Critic veta antes de publicar (anti-alucinação). Após RCA aprovado, **Backlog Decomposer** quebra o fix em épicos+stories. **Memória de 4 camadas** (longa/episódica/contextual/lições) é consultada após identificar o cliente — quando há fatos do domínio, a redelegação é pulada (economia de ~44% das iterações com memória bem calibrada). Após `DONE`, **Reflection** extrai uma lição generalizável se a execução teve sinais de aprendizado (veto, baixa confiança, max_iter).
 
 ---
 
@@ -86,11 +88,24 @@ Botão **Auto-demo** na UI roda os 8 em sequência.
 
 ---
 
-## Memória + Impact Eval
+## Memória (4 tipos) + Reflection + Impact Eval
 
-**Memória longa** ([memory_store/longa/](memory_store/longa/)): 1 yaml por cliente com `fatos` (stack, SLOs, peculiaridades) e `politicas` (heurísticas curtas). [memory_adapter.recuperar()](agents/memory_adapter.py) é chamado pela Triagem após identificar o cliente; quando retorna fatos, [_memoria_confidente()](agents/triagem.py) sinaliza domínio conhecido e a state machine pula a redelegação. Flag `SENTINEL_MEMORY_DISABLED=1` desliga (usado pelo eval pra estabelecer baseline).
+Três camadas de memória persistente + uma camada de reflexão automática, plus contextual via embeddings:
 
-**Impact Eval** ([evals/](evals/)): dataset de 8 cenários ([evals/datasets/sentinel_cases.json](evals/datasets/sentinel_cases.json)) com `expected_keywords` / `forbidden_keywords` / `contexto_memoria_esperado`. Cada caso roda 2x (com vs sem memória) e mede 8 métricas, comparativo gravado em `reports/evals/sentinel_impact_report_<ts>.md`:
+| Camada | Onde mora | Conteúdo | Como entra na decisão |
+| --- | --- | --- | --- |
+| **Longa** | [memory_store/longa/](memory_store/longa/) (8 yamls) | `fatos` (stack, SLOs) + `heuristicas` (hipóteses a validar, não receitas) + `nota_memoria` | Triagem identifica cliente → carrega fatos + heuristicas |
+| **Episódica** | [memory_store/episodica/](memory_store/episodica/) (8 yamls) | Incidentes passados resolvidos com `sintoma`/`causa`/`resolucao`/`resumo` | Top-5 episódios do cliente injetados no contexto da investigação |
+| **Contextual** | [memory_store/contextual/indice.json](memory_store/contextual/indice.json) | 27 fragmentos com embedding (de longa + episódica) | Busca por similaridade semântica da pergunta — pega fragmentos relevantes mesmo cross-cliente |
+| **Reflection** | [reflection_store/licoes/](reflection_store/licoes/) | Lições generalizáveis (políticas que emergiram de incidentes) | Sempre disponíveis (não filtradas por cliente) |
+
+**Embedding adapter** ([agents/embedding_adapter.py](agents/embedding_adapter.py)): usa `text-embedding-3-small` quando `OPENAI_API_KEY` está setada; cai em **fallback determinístico por token-overlap** caso contrário (Sentinel roda em OpenRouter, então o fallback é o caminho default). `python -m agents.embedding_adapter` reconstrói o índice.
+
+**Reflection extractor** ([agents/reflection.py](agents/reflection.py)): após `State.DONE`, dispara em 3 gatilhos — critic vetou / baixa confiança após retry / max_iter sem conclusão. Compõe lição curta a partir do trace, sanitiza secrets, deduplica por assinatura. Política: 1 lição por execução, falha silenciosa (nunca derruba investigação).
+
+**Flags:** `SENTINEL_MEMORY_DISABLED=1` desliga memória; `SENTINEL_REFLECTION_DISABLED=1` desliga extração de lições; `SENTINEL_FORCE_FALLBACK_EMBEDDING=1` força token-overlap mesmo com OpenAI key.
+
+**Impact Eval** ([evals/](evals/)): dataset de 8 cenários ([evals/datasets/sentinel_cases.json](evals/datasets/sentinel_cases.json)). Cada caso roda 2x (com vs sem memória) e mede **11 métricas**, comparativo em `reports/evals/sentinel_impact_report_<ts>.md`:
 
 | Métrica | Threshold | O que mede |
 | --- | --- | --- |
@@ -99,11 +114,16 @@ Botão **Auto-demo** na UI roda os 8 em sequência.
 | `evidence_coverage` | ≥ 0.60 | tipos de evidência mínima presentes |
 | `critic_alignment` | ≥ 0.80 | veredito do Critic bate com esperado |
 | `degraded_ratio` | ≤ 0.50 | % evidências em fallback (negativa) |
-| `retrieval_precision` | ≥ 0.70 | dos fragmentos recuperados, quantos batem |
+| `retrieval_precision` | ≥ 0.55 | dos fragmentos recuperados, quantos batem (calibrado pra fallback de embedding) |
 | `retrieval_recall` | ≥ 0.50 | dos fragmentos esperados, quantos foram recuperados |
 | `memory_improvement` | ≥ 0.0 (alvo 0.15) | redução combinada iter+redelegacoes com memória |
+| `memory_utilization` | ≥ 0.30 | o RCA usou tokens dos fragmentos recuperados? |
+| `hallucination_from_memory` | ≤ 0.45 | tokens da conclusão sem âncora em memória/evidência (negativa) |
+| `lesson_quality` | ≥ 0.60 | lições em `reflection_store/licoes/` são informativas? |
 
-Baseline atual (3 cenários, modo degradado): 8/8 PASS, `memory_improvement = 0.44`.
+**Baseline com LLM + MCPs reais** (1 caso, `acme_deploy_regression`): **11/11 PASS** — `degraded_ratio=0.09`, `retrieval_precision=0.90`, `memory_utilization=1.0`, `hallucination_from_memory=0.19`, `critic_alignment=1.0`. Tempo: ~120s/caso.
+
+**Baseline em modo degradado** (3 casos, sem LLM): 11/11 PASS, `memory_improvement=0.44`.
 
 ---
 
@@ -136,6 +156,9 @@ Baseline atual (3 cenários, modo degradado): 8/8 PASS, `memory_improvement = 0.
 | `SENTINEL_OBS_TIMEOUT_S` / `_TECNICO_TIMEOUT_S` | `60` / `90` |
 | `SENTINEL_GERAR_BACKLOG` | `1` (decompõe fix após RCA aprovado). `0` desliga. |
 | `SENTINEL_MEMORY_DISABLED` | `0` (memória ativa). `1` força no-op — usado pelo impact eval pra baseline. |
+| `SENTINEL_REFLECTION_DISABLED` | `0` (extração de lições ativa). `1` desliga reflection após DONE. |
+| `OPENAI_API_KEY` | Opcional. Se presente, embedding contextual usa `text-embedding-3-small`. Senão, fallback determinístico por token-overlap. |
+| `SENTINEL_FORCE_FALLBACK_EMBEDDING` | `0`. `1` força fallback mesmo com `OPENAI_API_KEY` presente. |
 
 Lista completa: [.env.example](.env.example).
 
@@ -144,17 +167,22 @@ Lista completa: [.env.example](.env.example).
 ## Estrutura
 
 ```text
-agents/         8 agentes + memory_adapter + helpers (_llm, _sdk_bridge, _telemetria, seed_helper)
-contracts/     8 × 5 specs + validar.py + analise-agente.md
-guards/        output_guard (PII) + safeguards (max_iter, token budget)
-mcp/config.json   5 MCPs (filesystem, mongodb, grafana, playwright, github)
-config/        llm.json + precos.json + diagnosticos.json
-data/          seed_mongo.js + logs/ + traces/
-memory_store/longa/   8 yamls (1 por cliente: fatos + politicas)
-evals/         datasets/sentinel_cases.json + suites/sentinel_impact_eval.yaml + eval_runner.py
-app.py         UI Streamlit
-tests/         testes pytest (rodam sem API key)
-reports/       RCAs + backlogs gerados; reports/evals/ recebe relatorios do impact eval
+agents/                 8 agentes + memory_adapter + embedding_adapter + reflection + helpers
+contracts/              8 × 5 specs + validar.py + analise-agente.md
+guards/                 output_guard (PII) + safeguards (max_iter, token budget)
+mcp/config.json         5 MCPs (filesystem, mongodb, grafana, playwright, github)
+config/                 llm.json + precos.json + diagnosticos.json
+data/                   seed_mongo.js + logs/ + traces/
+memory_store/
+  longa/                8 yamls (fatos + heuristicas por cliente)
+  episodica/            8 yamls (incidentes passados resolvidos)
+  contextual/           indice.json (embeddings de longa+episodica)
+reflection_store/
+  licoes/               lições generalizáveis (8 starter + extraídas automaticamente)
+evals/                  datasets + suites + eval_runner.py (11 metricas)
+app.py                  UI Streamlit
+tests/                  testes pytest (rodam sem API key)
+reports/                RCAs + backlogs gerados; reports/evals/ recebe relatorios do impact eval
 ```
 
 ---

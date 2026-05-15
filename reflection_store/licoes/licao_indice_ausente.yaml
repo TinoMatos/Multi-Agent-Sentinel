@@ -1,0 +1,9 @@
+id: licao_indice_ausente
+origem: incidente_beta_001
+criada_em: 2025-08-22
+licao: TIMEOUT_DB sem deploy correlato geralmente e indice ausente
+contexto: queries lentas sem mudanca recente de codigo apontam para falta de indice antes de capacidade
+aplicavel_quando:
+  - sintoma_contem: ["lento", "timeout", "slow query"]
+  - sem_deploy_recente: true
+acao_sugerida: pedir plano de execucao + verificar createIndex

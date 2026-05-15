@@ -1,0 +1,9 @@
+id: licao_auto_geral_20260515_061944
+origem: reflection_automatico
+criada_em: '2026-05-15'
+gatilho: 'critic_vetou: evidencias insuficientes (<2)'
+cliente: null
+licao: 'investigacao para sintoma ''alguma coisa estranha esta acontecendo'' foi vetada
+  pelo critic — motivos: evidencias insuficientes (<2). Antes de publicar, garantir
+  evidencias nao-degradadas e revisar contradicoes.'
+trace_id: null

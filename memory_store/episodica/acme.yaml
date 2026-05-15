@@ -1,0 +1,14 @@
+cliente: Acme Corp
+episodios:
+  - id: ep_acme_001
+    data: 2025-09-12
+    sintoma: erro 500 esporadico em /login
+    causa: regressao em commit anterior afetando resolveTenant (sem null-check)
+    resolucao: rollback do deploy + hotfix de null check em resolveTenant
+    resumo: regressao em resolveTenant causou erro 500 esporadico em /login — confirmar diff do commit atual antes de equiparar a este episodio
+  - id: ep_acme_002
+    data: 2025-11-03
+    sintoma: timeout em endpoints multi-tenant
+    causa: cache stale apos migracao de schema
+    resolucao: invalidacao manual + warmup
+    resumo: cache stale em multi-tenant apos migracao — invalidacao resolveu

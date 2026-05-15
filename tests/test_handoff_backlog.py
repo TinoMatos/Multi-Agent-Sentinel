@@ -28,7 +28,8 @@ async def test_rca_aprovado_dispara_backlog(mongo_seed, tmp_path, monkeypatch):
 @pytest.mark.asyncio
 async def test_rca_vetado_nao_gera_backlog(mongo_seed, tmp_path, monkeypatch):
     monkeypatch.setattr(rca_writer, "REPORTS_DIR", tmp_path)
-    # heuristica default veta Acme em degradado — sem mocks aqui
+    # heuristica default veta Acme em degradado — desliga memoria pra preservar baseline
+    monkeypatch.setenv("SENTINEL_MEMORY_DISABLED", "1")
     inv = await triagem.run("Por que o sistema da Acme esta caindo?")
     assert inv.rca_id is None
     assert inv.backlog_path is None

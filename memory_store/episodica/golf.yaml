@@ -1,0 +1,8 @@
+cliente: Golf Bank
+episodios:
+  - id: ep_golf_001
+    data: 2025-10-22
+    sintoma: workers de conciliacao parados sem deploy recente
+    causa: rotacao semanal de secret no Vault nao propagou pros workers
+    resolucao: redeploy dos workers + alerta de drift de secret
+    resumo: rotacao de secret quebrou auth dos workers — redeploy resolveu

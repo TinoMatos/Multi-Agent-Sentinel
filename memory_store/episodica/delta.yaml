@@ -1,0 +1,8 @@
+cliente: Delta Health
+episodios:
+  - id: ep_delta_001
+    data: 2025-07-18
+    sintoma: pods da API reiniciando a cada ~3h
+    causa: memory leak gradual (~50MB/h) em cache nao limitado
+    resolucao: LRU com max_size + heap dump como evidencia
+    resumo: leak em cache nao limitado causou OOM nos pods — LRU resolveu

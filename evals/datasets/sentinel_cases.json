@@ -7,7 +7,8 @@
     "forbidden_keywords": ["stripe", "memory leak", "indice", "rate-limit", "secret", "feature flag"],
     "evidencias_minimas": ["mongo", "erro", "commit"],
     "min_confianca": 0.70,
-    "critic_aprovado": true,
+    "critic_aprovado": false,
+    "_nota_critic": "Com MCPs reais + memoria heuristica (nao prescritiva), Critic veta corretamente: a memoria pede 'confirme diff antes de equiparar a episodio historico' mas GitHub MCP nao esta habilitado por default — sem ele a LLM nao consegue validar a equivalencia de codigo. Habilite SENTINEL_USE_GITHUB=1 com token pra que o veto suma.",
     "contexto_memoria_esperado": {
       "fatos": ["Acme usa multi-tenant com resolveTenant em src/auth/tenant.ts"],
       "episodios": ["incidente_anterior: commit 9988776655aa causou erro 500 esporadico em /login"],

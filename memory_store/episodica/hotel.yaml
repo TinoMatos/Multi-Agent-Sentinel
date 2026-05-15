@@ -1,0 +1,8 @@
+cliente: Hotel Streaming
+episodios:
+  - id: ep_hotel_001
+    data: 2025-11-08
+    sintoma: tela branca no novo player apos rampa
+    causa: feature flag new_player_v2 rampada a 100% sem rollback path
+    resolucao: rollback da flag para 0% + investigar bug do player
+    resumo: rampa de feature flag para 100% expos bug do player — rollback da flag resolveu

@@ -1,0 +1,11 @@
+id: licao_auto_acme_20260515_061944
+origem: reflection_automatico
+criada_em: '2026-05-15'
+gatilho: 'critic_vetou: maioria das evidencias em modo degradado (5/8) — sem confirmacao
+  externa via MCP'
+cliente: Acme Corp
+licao: 'investigacao para sintoma ''Por que o sistema da Acme esta caindo?'' em Acme
+  Corp foi vetada pelo critic com 5 evidencia(s) em fallback — motivos: maioria das
+  evidencias em modo degradado (5/8) — sem confirmacao externa via MCP. Antes de publicar,
+  garantir evidencias nao-degradadas e revisar contradicoes.'
+trace_id: null

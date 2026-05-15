@@ -1,0 +1,8 @@
+id: licao_feature_flag_rampa
+origem: incidente_hotel_001
+criada_em: 2025-11-09
+licao: erro novo coincidindo com rampa de feature flag rollback da flag antes de qualquer fix
+contexto: rampa de flag e a alavanca mais rapida de mitigacao — restaura o sistema enquanto o bug e investigado
+aplicavel_quando:
+  - sintoma_contem: ["feature flag", "rampa", "novo", "tela branca"]
+acao_sugerida: rollback da feature flag para 0% antes de qualquer fix de codigo

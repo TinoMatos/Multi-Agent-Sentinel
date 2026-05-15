@@ -1,0 +1,9 @@
+id: licao_oom_leak
+origem: incidente_delta_001
+criada_em: 2025-07-19
+licao: OOM_KILLED sem deploy recente investigar leak gradual de heap
+contexto: reinicio periodico de pods aponta para crescimento gradual de heap, nao spike
+aplicavel_quando:
+  - sintoma_contem: ["restart", "oom", "memory leak", "pod"]
+  - sem_deploy_recente: true
+acao_sugerida: tirar heap dump + analisar growth rate em janela de horas

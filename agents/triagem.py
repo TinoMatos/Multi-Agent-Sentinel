@@ -13,7 +13,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
-from agents import analista, critic, memory_adapter, observabilidade, rca_writer
+from agents import analista, critic, memory_adapter, observabilidade, rca_writer, reflection
 from agents import tecnico as tecnico_mod
 from agents._telemetria import Telemetria
 from guards import output_guard, safeguards
@@ -596,6 +596,13 @@ async def run(
             inv.estado = State.DONE
 
     _snapshot(State.DONE)
+    try:
+        veredito_final = getattr(inv, "_veredito", None)
+        licao_path = reflection.extrair_licoes(inv, veredito_final)
+        if licao_path:
+            inv.licao_extraida = licao_path  # type: ignore[attr-defined]
+    except Exception:
+        pass
     return inv
 
 

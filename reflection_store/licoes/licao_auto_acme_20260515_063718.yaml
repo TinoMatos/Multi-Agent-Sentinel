@@ -1,0 +1,21 @@
+id: licao_auto_acme_20260515_063718
+origem: reflection_automatico
+criada_em: '2026-05-15'
+gatilho: 'critic_vetou: contradicao LLM: Conclusão sugere ''regressão do mesmo bug''
+  baseada em RCA histórico (commit 9988776655aa), mas o deploy '
+cliente: Acme Corp
+licao: 'investigacao para sintoma ''Por que o sistema da Acme esta caindo?'' em Acme
+  Corp foi vetada pelo critic com 1 evidencia(s) em fallback — motivos: contradicao
+  LLM: Conclusão sugere ''regressão do mesmo bug'' baseada em RCA histórico (commit
+  9988776655aa), mas o deploy atual a1b2c3d4e5f6 é diferente e o erro ocorre em contexto
+  distinto (TypeError em resolveTenant vs. erro esporádico anterior) — falta evidência
+  de que é exatamente o mesmo bug; contradicao LLM: Recomendação de ''rollback imediato''
+  contradiz a evidência do RUNBOOK (log:7) que indica a solução correta é ''reaplicação
+  de PR #214 com validação ctx.user'' — rollback pode não resolver se o problema é
+  falta de validação introduzida antes de a1b2c3d4e5f6; contradicao LLM: Conclusão
+  correlaciona incidente ao deploy a1b2c3d4e5f6, mas o erro específico (Cannot read
+  properties of undefined reading ''tenantId'') sugere bug em código existente não
+  validado, não necessariamente introduzido por este deploy — falta evidência de mudança
+  no arquivo tenant.ts no commit a1b2c3d4e5f6. Antes de publicar, garantir evidencias
+  nao-degradadas e revisar contradicoes.'
+trace_id: null

@@ -1,0 +1,14 @@
+cliente: Echo Fintech
+episodios:
+  - id: ep_echo_001
+    data: 2025-09-30
+    sintoma: alerta noturno 502
+    causa: rolling restart automatico (janela 03:00-03:15)
+    resolucao: marcado como falso positivo, alerta silenciado nessa janela
+    resumo: alertas noturnos de Echo sao quase sempre falso positivo (rolling restart)
+  - id: ep_echo_002
+    data: 2025-11-12
+    sintoma: erro 502 transitorio durante hotfix
+    causa: deploy coincidiu com janela de restart
+    resolucao: aguardar 2 min, nao publicar RCA
+    resumo: 502 transitorio durante hotfix de Echo coincidiu com restart — sem RCA

@@ -80,12 +80,17 @@ async def query_mcp(servers: list[str], system: str, user: str, fast: bool = Fal
         # MCP indisponivel, query malformada, timeout do servidor, etc. -> modo degradado
         import logging
         # destrincha ExceptionGroup pra mostrar a causa real
-        detalhe = type(e).__name__
-        if hasattr(e, "exceptions"):
-            inner = [f"{type(x).__name__}: {str(x)[:200]}" for x in e.exceptions]  # type: ignore[attr-defined]
-            detalhe = f"{type(e).__name__} -> [{' | '.join(inner)}]"
-        else:
-            detalhe = f"{type(e).__name__}: {str(e)[:200]}"
+        def _achatar(exc, prof=0):
+            if prof > 4:
+                return [f"{type(exc).__name__}: {str(exc)[:200]}"]
+            if hasattr(exc, "exceptions") and exc.exceptions:  # type: ignore[attr-defined]
+                out = []
+                for x in exc.exceptions:  # type: ignore[attr-defined]
+                    out.extend(_achatar(x, prof + 1))
+                return out
+            return [f"{type(exc).__name__}: {str(exc)[:200]}"]
+        folhas = _achatar(e)
+        detalhe = f"{type(e).__name__} -> [{' | '.join(folhas)}]"
         logging.getLogger(__name__).warning("MCP %s indisponivel: %s", servers, detalhe)
         return []
 

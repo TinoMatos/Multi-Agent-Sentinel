@@ -76,20 +76,44 @@ def _carregar_licoes() -> list[dict]:
     return licoes[:MAX_POR_CATEGORIA]
 
 
+def _carregar_contextual(pergunta: str, cliente_key: str | None) -> list[dict]:
+    """Busca fragmentos contextuais por similaridade. Falha silenciosa quando indice vazio."""
+    try:
+        from agents import embedding_adapter
+        embedding_adapter.garantir_indice()
+        resultados = embedding_adapter.buscar(pergunta, max_resultados=MAX_POR_CATEGORIA)
+    except Exception:
+        return []
+    # Quando ha cliente_key, prioriza fragmentos do mesmo cliente (mas nao filtra estrito —
+    # licao generalizavel pode vir de outro cliente).
+    if cliente_key:
+        resultados.sort(
+            key=lambda r: (
+                r.get("metadados", {}).get("cliente_key") != cliente_key,
+                -r.get("similaridade", 0),
+            )
+        )
+    return resultados[:MAX_POR_CATEGORIA]
+
+
 def recuperar(pergunta: str, cliente_nome: str | None = None) -> dict[str, Any]:
     """Recupera contexto de memoria pra uma pergunta + cliente.
 
-    Retorna dict com chaves: fatos, episodios, licoes, habilitada, cliente_key.
+    Retorna dict com chaves: fatos, episodios, licoes, contextual, habilitada, cliente_key.
     Quando SENTINEL_MEMORY_DISABLED=1 retorna estrutura vazia (no-op controlado).
     """
     if not habilitada():
-        return {"fatos": [], "episodios": [], "licoes": [], "habilitada": False, "cliente_key": None}
+        return {
+            "fatos": [], "episodios": [], "licoes": [], "contextual": [],
+            "habilitada": False, "cliente_key": None,
+        }
 
     key = _cliente_key(cliente_nome)
     return {
         "fatos": _carregar_fatos(key) if key else [],
         "episodios": _carregar_episodios(key) if key else [],
         "licoes": _carregar_licoes(),
+        "contextual": _carregar_contextual(pergunta, key),
         "habilitada": True,
         "cliente_key": key,
     }
@@ -110,6 +134,10 @@ def resumir_para_conclusao(ctx: dict) -> str:
         resumo = ep.get("resumo") or ep.get("descricao") or ""
         if resumo:
             partes.append(f"episodio: {resumo}")
+    if ctx.get("contextual"):
+        frag = ctx["contextual"][0]
+        if isinstance(frag, dict) and frag.get("texto"):
+            partes.append(f"contextual: {frag['texto'][:120]}")
     if not partes:
         return ""
     return "Contexto historico: " + " | ".join(partes)

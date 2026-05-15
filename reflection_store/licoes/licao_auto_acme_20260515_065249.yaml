@@ -1,0 +1,19 @@
+id: licao_auto_acme_20260515_065249
+origem: reflection_automatico
+criada_em: '2026-05-15'
+gatilho: 'critic_vetou: contradicao LLM: Conclusão afirma ''RCA histórico similar
+  encontrado'' e recomenda equiparação ao episódio de 2026-03-12, '
+cliente: Acme Corp
+licao: 'investigacao para sintoma ''Por que o sistema da Acme esta caindo?'' em Acme
+  Corp foi vetada pelo critic com 1 evidencia(s) em fallback — motivos: contradicao
+  LLM: Conclusão afirma ''RCA histórico similar encontrado'' e recomenda equiparação
+  ao episódio de 2026-03-12, mas a evidência explicitamente recomenda ''confirmar
+  diff do commit atual antes de equiparar'' — diff não foi realizado (GitHub API inacessível).;
+  contradicao LLM: Conclusão recomenda ''rollback imediato'' baseado em regressão
+  do mesmo bug, mas não há confirmação de que o código atual contém a mesma vulnerabilidade
+  do commit 9988776655aa — o diff entre commits não foi validado.; contradicao LLM:
+  Conclusão correlaciona incidente ao deploy a1b2c3d4e5f6, mas evidências mostram
+  indisponibilidade crítica de ferramentas de validação (logs inacessíveis, GitHub
+  API indisponível, Playwright indisponível) — impossível confirmar causalidade com
+  certeza.. Antes de publicar, garantir evidencias nao-degradadas e revisar contradicoes.'
+trace_id: null

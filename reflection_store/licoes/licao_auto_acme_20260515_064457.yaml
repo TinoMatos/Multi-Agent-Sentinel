@@ -1,0 +1,16 @@
+id: licao_auto_acme_20260515_064457
+origem: reflection_automatico
+criada_em: '2026-05-15'
+gatilho: 'critic_vetou: contradicao LLM: Conclusão sugere regressão do mesmo bug histórico
+  (commit 9988776655aa em resolveTenant), mas evidência'
+cliente: Acme Corp
+licao: 'investigacao para sintoma ''Por que o sistema da Acme esta caindo?'' em Acme
+  Corp foi vetada pelo critic com 2 evidencia(s) em fallback — motivos: contradicao
+  LLM: Conclusão sugere regressão do mesmo bug histórico (commit 9988776655aa em resolveTenant),
+  mas evidência de filesystem mostra alteração em src/auth/tenant.ts SEM null-check
+  — padrão diferente do incidente anterior, não regressão idêntica; contradicao LLM:
+  RCA histórico aponta erro esporádico (/login), mas evidências mostram spike consistente
+  desde 2026-05-07 com frequência 1432 — padrão de falha contínua, não esporádica
+  como o precedente. Antes de publicar, garantir evidencias nao-degradadas e revisar
+  contradicoes.'
+trace_id: null

@@ -1,0 +1,8 @@
+cliente: Foxtrot Marketplace
+episodios:
+  - id: ep_foxtrot_001
+    data: 2025-08-04
+    sintoma: busca intermitente caindo + recomendacoes vazias
+    causa: rate-limit em cascata (catalogo -> recomendacoes -> busca)
+    resolucao: aumentado quota do catalogo + bulkhead pattern
+    resumo: rate-limit em cascata derrubou busca e recomendacoes — bulkhead resolveu

@@ -1,0 +1,9 @@
+id: licao_falso_positivo_noturno
+origem: incidente_echo_001
+criada_em: 2025-10-01
+licao: alerta na madrugada + cliente com rolling restart agendado provavel falso positivo
+contexto: clientes com janela de restart automatico geram 502 transitorio que dispara alerta sem incidente real
+aplicavel_quando:
+  - horario_contem: ["madrugada", "noturno", "03:"]
+  - tipo_alerta_contem: ["502", "restart"]
+acao_sugerida: marcar como falso positivo, nao publicar RCA

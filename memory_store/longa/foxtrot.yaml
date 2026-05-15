@@ -2,5 +2,6 @@ cliente: Foxtrot Marketplace
 fatos:
   - Foxtrot tem dependencia em cascata busca recomendacoes catalogo
   - Rate-limits do Foxtrot sao por servico, nao por usuario
-politicas:
-  - falha em servico downstream intermitente investigar rate-limit
+heuristicas:
+  - falha downstream intermitente historicamente correlaciona com rate-limit em cascata — validar quotas atuais antes de propor acao
+nota_memoria: heuristicas sao hipoteses a investigar. Evidencias frescas tem prioridade sobre memoria longa.

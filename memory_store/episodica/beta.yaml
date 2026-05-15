@@ -1,0 +1,8 @@
+cliente: Beta SaaS
+episodios:
+  - id: ep_beta_001
+    data: 2025-08-21
+    sintoma: painel admin lento (>8s)
+    causa: query de auditoria sem indice em coleção logs_admin
+    resolucao: createIndex({tenant:1, ts:-1})
+    resumo: query de auditoria sem indice deixou painel admin lento — indice resolveu

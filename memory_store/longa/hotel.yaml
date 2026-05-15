@@ -2,5 +2,6 @@ cliente: Hotel Streaming
 fatos:
   - Hotel rampou feature flag new_player_v2 para 100% dos free users
   - Hotel monitora flags via LaunchDarkly mas sem alerta de erro pos-rampa
-politicas:
-  - erro novo coincidindo com rampa de flag rollback da flag antes do deploy
+heuristicas:
+  - erro novo coincidindo com rampa de flag historicamente foi resolvido por rollback da flag — confirmar correlacao temporal e runbook antes de propor acao
+nota_memoria: heuristicas sao hipoteses a investigar. Evidencias frescas tem prioridade sobre memoria longa.
