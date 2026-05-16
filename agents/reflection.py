@@ -151,7 +151,9 @@ def extrair_licoes(inv, veredito) -> str | None:
         texto_licao = _redacao_licao(inv, veredito, gatilho)
         if not texto_licao:
             return None
-        texto_licao = _sanitizar(texto_licao)
+        from guards.output_guard import sanitize as _output_sanitize
+
+        texto_licao = _output_sanitize(_sanitizar(texto_licao))
 
         assinatura = _assinatura(texto_licao)
         if not assinatura or _licao_ja_existe(assinatura):

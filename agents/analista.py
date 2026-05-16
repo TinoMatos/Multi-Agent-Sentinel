@@ -6,6 +6,7 @@ chamar cada uma fica no orchestrator; aqui sao queries deterministicas.
 from __future__ import annotations
 
 import os
+import re
 from typing import Any
 
 from pymongo import MongoClient
@@ -21,7 +22,7 @@ def _db():
 
 
 def cliente_por_nome(nome: str) -> dict[str, Any] | None:
-    return _db().clientes.find_one({"nome": {"$regex": nome, "$options": "i"}})
+    return _db().clientes.find_one({"nome": {"$regex": re.escape(nome), "$options": "i"}})
 
 
 def tickets_abertos_do_cliente(client_id) -> list[dict[str, Any]]:
@@ -58,7 +59,7 @@ def rcas_similares(
         ticket_ids = [e["ticket_relacionado"] for e in cur if e.get("ticket_relacionado")]
     except Exception:
         # fallback: substring naive (mongomock nao suporta $text + textScore)
-        query = {"stacktrace": {"$regex": chave[:40]}, **erro_filter}
+        query = {"stacktrace": {"$regex": re.escape(chave[:40])}, **erro_filter}
         cur = db.erros.find(query).limit(limit * 3)
         ticket_ids = [e["ticket_relacionado"] for e in cur if e.get("ticket_relacionado")]
     if not ticket_ids:
@@ -81,10 +82,16 @@ def rcas_similares(
 def registrar_rca(ticket_id, conclusao: str, evidencias: list[dict[str, Any]]) -> Any:
     from datetime import datetime, timezone
 
+    from guards.output_guard import sanitize
+
+    evidencias_safe = [
+        {**e, "nota": sanitize(e["nota"]) if isinstance(e.get("nota"), str) else e.get("nota")}
+        for e in evidencias
+    ]
     rca = {
         "ticket_id": ticket_id,
-        "conclusao": conclusao,
-        "evidencias": evidencias,
+        "conclusao": sanitize(conclusao),
+        "evidencias": evidencias_safe,
         "gerado_em": datetime.now(timezone.utc),
     }
     rca_id = _db().rcas.insert_one(rca).inserted_id

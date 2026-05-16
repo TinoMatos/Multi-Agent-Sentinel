@@ -63,9 +63,11 @@ def render_rca(
 
 
 def salvar(markdown: str, ticket_id: Any) -> Path:
+    from guards.output_guard import sanitize
+
     REPORTS_DIR.mkdir(exist_ok=True)
     path = REPORTS_DIR / f"rca_{ticket_id}.md"
-    path.write_text(markdown, encoding="utf-8")
+    path.write_text(sanitize(markdown), encoding="utf-8")
     return path
 
 

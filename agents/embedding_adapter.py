@@ -115,11 +115,13 @@ def _salvar_indice(indice: list[dict]) -> None:
 
 
 def indexar(texto: str, metadados: dict | None = None) -> str:
+    from guards.output_guard import sanitize
+
     emb = gerar_embedding(texto)
     indice = _carregar_indice()
     entrada = {
         "id": f"emb_{uuid.uuid4().hex[:8]}",
-        "texto": texto,
+        "texto": sanitize(texto),
         "embedding": emb,
         "metadados": metadados or {},
         "timestamp": datetime.now().isoformat(),

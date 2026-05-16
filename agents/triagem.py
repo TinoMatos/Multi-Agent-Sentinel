@@ -433,7 +433,7 @@ async def _gerar_backlog(inv: Investigacao) -> str | None:
         ref = inv.rca_id or (inv.ticket["_id"] if inv.ticket else "sem_ticket")
         path = rca_writer.REPORTS_DIR / f"backlog_{ref}.md"
         rca_writer.REPORTS_DIR.mkdir(exist_ok=True)
-        path.write_text(backlog.render(), encoding="utf-8")
+        path.write_text(output_guard.sanitize(backlog.render()), encoding="utf-8")
         return str(path)
     except Exception:
         return None
@@ -454,13 +454,13 @@ def _persistir_trace(inv: Investigacao, veredito: critic.Veredito) -> None:
     trace = {
         "ticket_id": str(ticket_id),
         "rca_id": str(inv.rca_id) if inv.rca_id else None,
-        "pergunta": inv.pergunta,
+        "pergunta": output_guard.sanitize(inv.pergunta or ""),
         "cliente": inv.cliente.get("nome") if inv.cliente else None,
         "confianca": inv.confianca,
         "iteracao": inv.iteracao,
         "redelegacoes": inv.redelegacoes,
         "veredito_aprovado": veredito.aprovado,
-        "veredito_motivos": veredito.motivos,
+        "veredito_motivos": [output_guard.sanitize(m) for m in veredito.motivos],
         "evidencias": [
             {"tipo": e.get("tipo"), "ref": str(e.get("ref")), "degradado": "degradado" in (e.get("nota") or "").lower()}
             for e in inv.evidencias
